@@ -96,3 +96,7 @@
 + 直接对SVG对象进行操作和更新，需要用到python的xml解析库（参考：[菜鸟教程](https://www.runoob.com/python3/python3-xml-processing.html)、[Python官方文档](https://docs.python.org/3/library/xml.dom.html)）。
 
 + 使用SVG SMIL强大的效果来产生动画（参考：[学长的博客](https://www.zhangxinxu.com/wordpress/2014/08/so-powerful-SVG-smil-animation/)、[浏览器内核官方文档](https://developer.mozilla.org/zh-CN/docs/Web/SVG/SVG_animation_with_SMIL)、[贝塞尔曲线介绍](https://www.zhangxinxu.com/wordpress/2014/06/deep-understand-SVG-path-bezier-curves-command/)）。
+
++ 编程接口设计时需要用到Python的弱引用技术(参考：[简书](https://www.jianshu.com/p/0cecea85ae3b))。
+
++ Python自定义Class中的运算符重载（参考：[简书](https://www.jianshu.com/p/8a51e384b5f3)）。
