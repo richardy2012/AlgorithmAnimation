@@ -8,7 +8,7 @@
     + `array.py` 绘制一维数组。
     + `utility.py` 定义一些公共函数（如：文本颜色配置、SVG节点创建等）。
 + test/ 测试相关代码：
-    + `test_xxx.ipynb` 测试各对象功能是否正常。
+    + `test_utility.ipynb` 测试公共库中各接口功能是否正常。
 
 ## 前提条件
 
