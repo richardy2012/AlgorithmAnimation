@@ -8,7 +8,7 @@ class Algviz():
     def __init__(self):
         self._next_display_id = 0
         self._animate_delay = 3.0
-        self._color_list = [
+        self._trace_color_list = [
             (211, 211, 211), # LightGray
             (245, 222, 179), # Wheat
             (255, 182, 193), # LightPink
@@ -34,9 +34,15 @@ class Algviz():
         pass
 
     '''
-    返回：创建的列表对象。
+    返回：创建的单向列表对象。
     '''
-    def create_list():
+    def create_forward_list():
+        pass
+    
+    '''
+    返回：创建的双向列表对象。
+    '''
+    def create_double_list():
         pass
 
     '''
