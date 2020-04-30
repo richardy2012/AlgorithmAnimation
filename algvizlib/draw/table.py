@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import copy
 import svg_table as svgtab
 import utility as util
 
@@ -8,6 +7,7 @@ class TableTrace():
     '''
     table:Table 跟踪器所跟踪的表格对象。
     color:(R,G,B) 跟踪器所在单元格的RGB背景颜色。
+    hold:bool 是否一直保留轨迹。
     r:int 跟踪器起点所在行坐标。
     c:int 跟踪器起点所在列坐标。
     '''
@@ -20,12 +20,14 @@ class TableTrace():
 
     def __del__(self):
         if self._hold:
-            self._table.delete_trace(self)
+            self._table.delete_trace(self._color)
 
 class Table():
     '''
     row:int 表格行数。
     col:int 表格列数。
+    data:list(list(...)) 初始化数据。
+    cell_size:float 单元格宽度。
     display_id:int 刷新显示所用的id值。
     '''
     def __init__(self, row, col, data, cell_size):
@@ -81,9 +83,9 @@ class Table():
         return self._svg._repr_svg_()
     
     '''
-    trace:TableTrace将要被删除的表格跟踪器对象。
+    trace_color:(R,G,B) 将要被删除的表格跟踪器对象的颜色。
     '''
-    def delete_trace(self, trace):
+    def delete_trace(self, trace_color):
         for gid in range(self._row*self._col):
-            if self._cell_tcs[gid].remove(trace._color):
+            if self._cell_tcs[gid].remove(trace_color):
                 self._svg.update_rect_element(gid, fill=self._cell_tcs[gid].color())
