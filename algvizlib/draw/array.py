@@ -30,8 +30,10 @@ class Array():
         self._data = list()
         if data:
             self._data = data
-        self._bar_height = bar_height
-        self._svg_size = svg_size
-        self._cell_tcs = dict()  # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
+        self._bar = bar
+        self._cell_width = 50           # 单元格宽度默认为50个像素点。
+        self._svg_width = svg_size[0]
+        self._svg_height = svg_size[1]
+        self._cell_tcs = dict()         # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
         self._frame_trace_old = list()  # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
-        self._frame_trace = list()  # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
+        self._frame_trace = list()      # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。

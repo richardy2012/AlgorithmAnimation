@@ -73,11 +73,11 @@ bessel:代表是否沿贝塞尔曲线路径运动。
 def add_animate_move_into_node(g, animate, move, time, bessel):
     g.appendChild(animate)
     if bessel:
-        animate.setAttribute('path', 'm0,0 q{},{} {},{}'.format(move[0]*0.5-move[1]*0.2, move[1]*0.5+move[0]*0.2, move[0], move[1]))
+        animate.setAttribute('path', 'm0,0 q{:.2f},{:.2f} {:.2f},{:.2f}'.format(move[0]*0.5-move[1]*0.2, move[1]*0.5+move[0]*0.2, move[0], move[1]))
     else:
-        animate.setAttribute('path', 'm0,0 l{},{}'.format(move[0], move[1]))
-    animate.setAttribute('begin', '{}s'.format(time[0]))
-    animate.setAttribute('dur', '{}s'.format(time[1]-time[0]))
+        animate.setAttribute('path', 'm0,0 l{:.2f},{:.2f}'.format(move[0], move[1]))
+    animate.setAttribute('begin', '{:.2f}s'.format(time[0]))
+    animate.setAttribute('dur', '{:.2f}s'.format(time[1]-time[0]))
     animate.setAttribute('fill', 'freeze')
 
 '''
@@ -91,8 +91,8 @@ def add_animate_appear_into_node(g, animate, time, appear=True):
     animate.setAttribute('attributeName', 'opacity')
     animate.setAttribute('from', '{:.0f}'.format(not appear))
     animate.setAttribute('to', '{:.0f}'.format(appear))
-    animate.setAttribute('begin', '{}s'.format(time[0]))
-    animate.setAttribute('dur', '{}s'.format(time[1]-time[0]))
+    animate.setAttribute('begin', '{:.2f}s'.format(time[0]))
+    animate.setAttribute('dur', '{:.2f}s'.format(time[1]-time[0]))
     animate.setAttribute('fill', 'freeze')
 
 '''
@@ -120,3 +120,17 @@ color_str:#F0F0F0格式的字符串。
 def str2rgbcolor(color_str):
     color_str = color_str.strip('#')
     return (int(color_str[0:2], 16), int(color_str[2:4], 16), int(color_str[4:6], 16))
+
+'''
+text_width:float 文本框宽度。
+text:str 文本内容（中英文混合都支持）。
+返回值：float 理想字体大小。
+'''
+def text_font_size(text_width, text):
+    display_len = 0
+    for ch in text:
+        if '\u4e00' <= ch <= '\u9fff':
+            display_len += 2
+        else:
+            display_len += 1
+    return min(16, text_width*1.5/display_len)

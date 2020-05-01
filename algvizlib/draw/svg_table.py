@@ -18,12 +18,12 @@ class SvgTable():
         self._dom.appendChild(self._svg)
 
     '''
-    rect:(x, y, w, h)矩形左下角坐标和矩形尺寸。
-    text:矩形内部文本字符串。
-    fill:(R,G,B)矩形填充颜色。
-    stroke:(R,G,B)矩形边框颜色。
-    angle:bool代表矩形四个角是否为圆角。
-    返回:int该矩形元素的id值。
+    rect:(x, y, w, h) 矩形左下角坐标和矩形尺寸。
+    text:str 矩形内部文本字符串。
+    fill:(R,G,B) 矩形填充颜色。
+    stroke:(R,G,B) 矩形边框颜色。
+    angle:bool 代表矩形四个角是否为圆角。
+    返回:int 该矩形元素的id值。
     '''
     def add_rect_element(self, rect, text=None, fill=(255,255,255), stroke=(123,123,123), angle=True):
         gid = str(self._cur_id)
@@ -32,13 +32,13 @@ class SvgTable():
         g.setAttribute('id', gid)
         self._svg.appendChild(g)
         r = self._dom.createElement('rect')
-        r.setAttribute('x', str(rect[0]))
-        r.setAttribute('y', str(rect[1]))
-        r.setAttribute('width', str(rect[2]))
-        r.setAttribute('height', str(rect[3]))
+        r.setAttribute('x', '{:.2f}'.format(rect[0]))
+        r.setAttribute('y', '{:.2f}'.format(rect[1]))
+        r.setAttribute('width', '{:.2f}'.format(rect[2]))
+        r.setAttribute('height', '{:.2f}'.format(rect[3]))
         if angle is True:
-            r.setAttribute('rx', str(rect[2]*0.1))
-            r.setAttribute('ry', str(rect[3]*0.1))
+            r.setAttribute('rx', '{:.2f}'.format(rect[2]*0.1))
+            r.setAttribute('ry', '{:.2f}'.format(rect[3]*0.1))
         r.setAttribute('fill', util.rgbcolor2str(fill))
         r.setAttribute('stroke', util.rgbcolor2str(stroke))
         g.appendChild(r)
@@ -46,8 +46,9 @@ class SvgTable():
             t = self._dom.createElement('text')
             t.setAttribute('alignment-baseline', 'middle')
             t.setAttribute('text-anchor', 'middle')
-            t.setAttribute('x', str(rect[0]+rect[2]*0.5))
-            t.setAttribute('y', str(rect[1]+rect[3]*0.5))
+            t.setAttribute('x', '{:.2f}'.format(rect[0]+rect[2]*0.5))
+            t.setAttribute('y', '{:.2f}'.format(rect[1]+rect[3]*0.5))
+            t.setAttribute('font-size', '{:.2f}'.format(util.text_font_size(rect[2], '{}'.format(text))))
             t.setAttribute('fill', util.auto_text_color(fill))
             tt = self._dom.createTextNode('{}'.format(text))
             t.appendChild(tt)
@@ -55,12 +56,13 @@ class SvgTable():
         return int(gid)
     
     '''
-    gid:int要更新的矩形元素的ID值。
-    text:矩形内部文本字符串。
-    fill:(R,G,B)矩形填充颜色。
-    stroke:(R,G,B)矩形边框颜色。
+    gid:int 要更新的矩形元素的ID值。
+    rect:(x, y, w, h) 矩形左下角坐标和矩形尺寸。
+    text:str 矩形内部文本字符串。
+    fill:(R,G,B) 矩形填充颜色。
+    stroke:(R,G,B) 矩形边框颜色。
     '''
-    def update_rect_element(self, gid, text=None, fill=None, stroke=None):
+    def update_rect_element(self, gid, rect=None, text=None, fill=None, stroke=None):
         g = util.find_tag_by_id(self._svg, 'g', str(gid))
         if g is None:
             return
@@ -70,19 +72,33 @@ class SvgTable():
             r.setAttribute('fill', util.rgbcolor2str(fill))
             if len(t):
                 t[0].setAttribute('fill', util.auto_text_color(fill))
+        if rect is not None:
+            r.setAttribute('x', '{:.2f}'.format(rect[0]))
+            r.setAttribute('y', '{:.2f}'.format(rect[1]))
+            r.setAttribute('width', '{:.2f}'.format(rect[2]))
+            r.setAttribute('height', '{:.2f}'.format(rect[3]))
+            if r.getAttribute('rx') != '':
+                r.setAttribute('rx', '{:.2f}'.format(rect[2]*0.1))
+                r.setAttribute('ry', '{:.2f}'.format(rect[3]*0.1))
+            if len(t):
+                t[0].setAttribute('x', '{:.2f}'.format(rect[0]+rect[2]*0.5))
+                t[0].setAttribute('y', '{:.2f}'.format(rect[1]+rect[3]*0.5))
+                new_font = util.text_font_size(rect[2], '{}'.format(t[0].firstChild.nodeValue))
+                t[0].setAttribute('font-size', '{:.2f}'.format(new_font))
         if text is not None:
             if len(t) == 0:
-                rx = int(r.getAttribute('x'))
-                ry = int(r.getAttribute('y'))
-                width = int(r.getAttribute('width'))
-                height = int(r.getAttribute('height'))
+                rx = float(r.getAttribute('x'))
+                ry = float(r.getAttribute('y'))
+                width = float(r.getAttribute('width'))
+                height = float(r.getAttribute('height'))
                 fc = util.str2rgbcolor(r.getAttribute('fill'))
                 t = self._dom.createElement('text')
                 g.appendChild(t)
                 t.setAttribute('alignment-baseline', 'middle')
                 t.setAttribute('text-anchor', 'middle')
-                t.setAttribute('x', str(rx+width*0.5))
-                t.setAttribute('y', str(ry+height*0.5))
+                t.setAttribute('x', '{:.2f}'.format(rx+width*0.5))
+                t.setAttribute('y', '{:.2f}'.format(ry+height*0.5))
+                t.setAttribute('font-size', '{:.2f}'.format(util.text_font_size(width, '{}'.format(text))))
                 t.setAttribute('fill', util.auto_text_color(fc))
             else:
                 t = t[0]
@@ -102,7 +118,7 @@ class SvgTable():
             self._svg.removeChild(g)
     
     '''
-    gid:int对应显示单元元素的id。
+    gid:int 要移动元素的索引值。
     move:(delt_x, delt_y)对象分别沿x和y轴的移动。
     time:(begin, end)动画开始和结束时间。
     bessel:代表是否沿贝塞尔曲线路径运动。
