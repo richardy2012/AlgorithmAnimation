@@ -52,6 +52,8 @@ class Table():
     返回： 跟踪器对应位置的值。
     '''
     def __getitem__(self, trace):
+        if trace.r < 0 or trace.r >= self._row or trace.c < 0 or trace.c >= self._col:
+            raise Exception("Table trace out of range!")
         gid = trace.r*self._col + trace.c
         self._cell_tcs[gid].add(trace._color)
         self._frame_trace.append((gid, trace._color, trace._hold))
@@ -62,6 +64,8 @@ class Table():
     val: 为表格中跟踪器所在单元所赋的值。
     '''
     def __setitem__(self, trace, val):
+        if trace.r < 0 or trace.r >= self._row or trace.c < 0 or trace.c >= self._col:
+            raise Exception("Table trace out of range!")
         gid = trace.r*self._col + trace.c
         self._cell_tcs[gid].add(trace._color)
         self._frame_trace.append((gid, trace._color, trace._hold))

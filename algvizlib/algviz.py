@@ -7,6 +7,7 @@ import draw.graph
 class Algviz():
     def __init__(self):
         self._next_display_id = 0
+        self._animate_delay = 3.0
         self._trace_color_list = [
             (211, 211, 211), # LightGray
             (245, 222, 179), # Wheat
