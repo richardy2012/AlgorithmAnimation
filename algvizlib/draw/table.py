@@ -46,6 +46,7 @@ class Table():
                 rect = (c*cell_size+5, (r+1)*cell_size+5, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = util.TraceColorStack()
+        # TODO 添加行号和列号的索引【当vector长度增加时，尾部索引加一，减少时尾部索引减一】。
     
     '''
     trace:TableTrace 表格的跟踪器对象。
@@ -69,6 +70,7 @@ class Table():
         gid = trace.r*self._col + trace.c
         self._cell_tcs[gid].add(trace._color)
         self._frame_trace.append((gid, trace._color, trace._hold))
+        self._svg.update_rect_element(gid, text=val)
         self._data[trace.r][trace.c] = val
     
     '''

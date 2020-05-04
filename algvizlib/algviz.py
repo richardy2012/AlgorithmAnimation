@@ -18,6 +18,7 @@ class Algviz():
             (144, 238, 144), # LightGreen
             (255, 193, 37),  # Goldenrod
         ]
+        self._elements = list()
 
     '''
     row:表格行数；col:表格列数。
@@ -30,7 +31,7 @@ class Algviz():
     bar:是否以柱状图的形式显示数组。
     返回：创建的数组对象。
     '''
-    def create_array(bar=False):
+    def create_vector(bar=False):
         pass
 
     '''
