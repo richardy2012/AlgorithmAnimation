@@ -40,6 +40,7 @@ class Vector():
         self._rect_disappear = list()   # 记录下一帧动画中消失的矩形索引。
         self._rect_appear = list()      # 记录下一帧动画中出现的矩形索引。
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
+        self._nb_trace = 0              # 记录跟踪器的数目（方便为其分配颜色）。
         self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, cell_size+2*self._cell_margin)
         for i in range(len(data)):
             rect = (cell_size*i+self._cell_margin*(i+1), self._cell_margin, cell_size, cell_size)

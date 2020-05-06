@@ -1,17 +1,20 @@
 # algvizlib设计原理
 
 ## 文件目录
-+ `algviz.py` 定义基本数据结构（拓扑图、表格）的交互接口。
-+ draw/ 绘图相关代码：
++ algviz/ 绘图相关代码：
+    + `algviz.py` 定义基本数据结构（拓扑图、表格）的交互接口。
     + `graph.py` 绘制拓扑图。
     + `table.py` 绘制二维表格。
-    + `array.py` 绘制一维数组。
+    + `vector.py` 绘制一维数组。
     + `svg_table.py` 创建矩形列表形式的svg对象。
     + `svg_graph.py` 解析拓扑图的svg对象。
     + `utility.py` 定义一些公共函数。
+    + `__init__.py` 表示该文件是一个包。
 + test/ 测试相关代码：
     + `test_svg_table.ipynb` 测试`svg_table.py`中各接口功能是否正常。
     + `test_table.ipynb` 测试`table.py`中各接口功能是否正常。
+    + `test_vector.ipynb` 测试`vector.py`中各接口功能是否正常。
+    + `test_algviz.ipynb` 测试`algviz.py`中各接口功能是否正常。
 
 ## 前提条件
 
@@ -71,20 +74,20 @@
 + 使用不同颜色的tracer来标记表格中被访问过的单元格。
     + Tracer的颜色混合策略（目前采用正片垫底的策略）。参考资料：[rgb颜色混合](https://www.jianshu.com/p/6d9a3f39bb53)
 
-### 数组
+### 向量
 
-+ 使用一维的list来保存数组，数组长度不超过100。
-+ Tracer用来表示数组下标索引，为自定义对象。
-+ 数组支持的操作：
-    + 访问和修改数组中的元素：
++ 使用一维的list来保存数组，向量长度不超过100。
++ Tracer用来表示向量下标索引，为自定义对象。
++ 向量支持的操作：
+    + 访问和修改向量中的元素：
         + 将访问和修改过的单元格标记对应Tracer的颜色。
-    + 向数组中添加元素：
+    + 向向量中添加元素：
         + 使用insert(tracer, val)接口进行添加元素，将其添加到tracer所在位置前。
         + 添加时自动记录操作，然后在刷新时自动生成动画。
-    + 删除数组中的元素：
+    + 删除向量中的元素：
         + 使用pop(tracer)删除tracer位置所在的元素。
         + 被删除的元素自动淡出，数组尾部的元素向前移动凑齐数组。
-    + 求数组长度__len()\_\_接口重载。
+    + 求向量长度__len()\_\_接口重载。
 + 动画刷新时的步骤：
     1. 淡出要删除的元素。
     2. 将剩余元素移动到最终位置。
@@ -103,7 +106,7 @@
 
 + 使用SVG SMIL强大的效果来产生动画（参考：[学长的博客](https://www.zhangxinxu.com/wordpress/2014/08/so-powerful-SVG-smil-animation/)、[浏览器内核官方文档](https://developer.mozilla.org/zh-CN/docs/Web/SVG/SVG_animation_with_SMIL)、[贝塞尔曲线介绍](https://www.zhangxinxu.com/wordpress/2014/06/deep-understand-SVG-path-bezier-curves-command/)）。
 
-+ 编程接口设计时需要用到Python的弱引用技术(参考：[简书](https://www.jianshu.com/p/0cecea85ae3b))。
++ 编程接口设计时需要用到Python的弱引用技术，这里使用`WeakKeyDictionary`类(参考：[Python官方](https://docs.python.org/3.1/library/weakref.html)，[简书](https://www.jianshu.com/p/0cecea85ae3b))。
 
 + Python自定义Class中的运算符重载（参考：[简书](https://www.jianshu.com/p/8a51e384b5f3)）。
 
