@@ -17,8 +17,7 @@ class VectorTrace():
         self.i = i
         
     def __del__(self):
-        if self._hold:
-            self._vector.delete_trace(self._color)
+        self._vector.delete_trace(self)
 
 class Vector():
     '''
@@ -26,7 +25,7 @@ class Vector():
     delay:float 动画延时。
     cell_size:float 单元格宽度。
     '''
-    def __init__(self, data, delay, cell_size):
+    def __init__(self, data, delay, cell_size, name):
         if not isinstance(data, list):
             return
         self._data = data               # 保存数组中的数据。
@@ -40,14 +39,26 @@ class Vector():
         self._rect_disappear = list()   # 记录下一帧动画中消失的矩形索引。
         self._rect_appear = list()      # 记录下一帧动画中出现的矩形索引。
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
-        self._nb_trace = 0              # 记录跟踪器的数目（方便为其分配颜色）。
-        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, cell_size+2*self._cell_margin)
+        self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
+        self._trace_color = set()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
+        self._offset_x = 0
+        if name is not None:
+            self._offset_x = min(50, cell_size*2)
+        self._label_font_size = min(12, cell_size)
+        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin+self._offset_x, cell_size+2*self._cell_margin+self._label_font_size)
         for i in range(len(data)):
-            rect = (cell_size*i+self._cell_margin*(i+1), self._cell_margin, cell_size, cell_size)
+            rect = (cell_size*i+self._cell_margin*(i+1)+self._offset_x, self._cell_margin, cell_size, cell_size)
             rid = self._svg.add_rect_element(rect, text=data[i])
             self._cell_tcs[rid] = util.TraceColorStack()
             self._index2rect[i] = rid
-        # TODO 添加下标索引。
+        if name is not None:
+            pos = (self._offset_x*0.5, cell_size*0.5+self._cell_margin)
+            font_size = util.text_font_size(self._offset_x, name)
+            self._svg.add_text_element(pos, name, font_size=font_size, fill=(0,0,0))
+        for i in range(len(data)):
+            pos = (cell_size*i+self._cell_margin*(i+1)+self._offset_x+cell_size*0.5, self._cell_margin*2+cell_size+self._label_font_size*0.5)
+            tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
+            self._index2text.append(tid)
     
     '''
     trace:VectorTrace 数组的跟踪器对象。
@@ -88,7 +99,7 @@ class Vector():
         elif trace.i >= len(self._data):
             trace.i = len(self._data)
         # 向svg中添加新的矩形节点和动画。
-        rect = (self._cell_size*trace.i+self._cell_margin*(trace.i+1), self._cell_margin, self._cell_size, self._cell_size)
+        rect = (self._cell_size*trace.i+self._cell_margin*(trace.i+1)+self._offset_x, self._cell_margin, self._cell_size, self._cell_size)
         rid = self._svg.add_rect_element(rect, text=val)
         self._svg.add_animate_appear(rid, (0, self._delay))
         # 记录插入位置以后的矩形的移动。
@@ -134,7 +145,8 @@ class Vector():
     '''
     def _repr_svg_(self):
         # 更新矩形跟踪器的颜色。
-        self._svg.update_svg_size(len(self._data)*self._cell_size+(len(self._data)+1)*self._cell_margin, self._cell_size+2*self._cell_margin)
+        nb_elem = len(self._data) + len(self._rect_disappear)
+        self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin+self._offset_x, self._cell_size+2*self._cell_margin+self._label_font_size)
         for (rid, color) in self._frame_trace_old:
             self._cell_tcs[rid].remove(color)
             self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
@@ -149,6 +161,15 @@ class Vector():
             if self._rect_move[rid] == 0:
                 continue
             self._svg.add_animate_move(rid, (self._rect_move[rid]*(self._cell_size+self._cell_margin), 0) , (0, self._delay), bessel=False)
+        if len(self._index2text) > len(self._data):
+            for i in range(len(self._index2text)-len(self._data)):
+                self._svg.delete_element(self._index2text[-1])
+                self._index2text.pop()
+        elif len(self._index2text) < len(self._data):
+            for i in range(len(self._index2text), len(self._data)):
+                pos = (self._cell_size*i+self._cell_margin*(i+1)+self._offset_x+self._cell_size*0.5, self._cell_margin*2+self._cell_size+self._label_font_size*0.5)
+                tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
+                self._index2text.append(tid)
         res = self._svg._repr_svg_()
         # 清除动画效果，更新SVG内容，为下一帧做准备。
         self._svg.clear_animates()
@@ -159,7 +180,7 @@ class Vector():
             self._svg.update_rect_element(rid, rect=rect)
         self._rect_move.clear()
         for rid in self._rect_disappear:
-            self._svg.delete_rect_element(rid)
+            self._svg.delete_element(rid)
             self._cell_tcs.pop(rid)
         self._rect_disappear.clear()
         for rid in self._rect_appear:
@@ -168,9 +189,11 @@ class Vector():
         return res
     
     '''
-    trace_color:(R,G,B) 将要被删除的数组跟踪器对象的颜色。
+    trace:TableTrace 将要被删除的数组跟踪器对象。
     '''
-    def delete_trace(self, trace_color):
-        for rid in self._index2rect.values():
-            if self._cell_tcs[rid].remove(trace_color):
-                self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
+    def delete_trace(self, trace):
+        if trace._hold:
+            for rid in self._index2rect.values():
+                if self._cell_tcs[rid].remove(trace._color):
+                    self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
+        self._trace_color.remove(trace._color)

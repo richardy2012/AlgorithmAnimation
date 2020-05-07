@@ -19,8 +19,7 @@ class TableTrace():
         self.c = c
 
     def __del__(self):
-        if self._hold:
-            self._table.delete_trace(self._color)
+        self._table.delete_trace(self)
 
 class Table():
     '''
@@ -29,25 +28,38 @@ class Table():
     data:list(list(...)) 初始化数据。
     cell_size:float 单元格宽度。
     display_id:int 刷新显示所用的id值。
+    name:str 表格的名字。
     '''
-    def __init__(self, row, col, data, cell_size):
+    def __init__(self, row, col, data, cell_size, name):
         self._row = row
         self._col = col
         self._cell_tcs = dict()           # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
         self._frame_trace_old = list()    # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()        # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
-        self._nb_trace = 0                # 记录跟踪器的数目（方便为其分配颜色）。
+        self._trace_color = set()         # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
         if data is None:
             self._data = [[None for _ in range(col)] for _ in range(row)]
         else:
             self._data = data
-        self._svg = svgtab.SvgTable(col*cell_size+10, row*cell_size+10)
+        offset_x, offset_y = 0, 0
+        if name is not None:
+            offset_y = util.text_font_size(cell_size*col, name)+3
+        offset_x = min(24, cell_size)
+        self._svg = svgtab.SvgTable(col*cell_size+offset_x, row*cell_size+offset_y+offset_x)
         for r in range(self._row):
             for c in range(self._col):
-                rect = (c*cell_size+5, (r+1)*cell_size+5, cell_size, cell_size)
+                rect = (c*cell_size+offset_x, r*cell_size+offset_y, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = util.TraceColorStack()
-        # TODO 添加行号和列号的索引【当vector长度增加时，尾部索引加一，减少时尾部索引减一】。
+        if name is not None:
+            pos = (col*cell_size*0.5+offset_x, offset_y*0.5)
+            self._svg.add_text_element(pos, name, font_size=offset_y-3, fill=(0,0,0))
+        for r in range(row):
+            pos = (offset_x*0.5, r*cell_size+cell_size*0.5+offset_y)
+            self._svg.add_text_element(pos, r, font_size=offset_x*0.5)
+        for c in range(col):
+            pos = (c*cell_size+cell_size*0.5+offset_x, row*cell_size+offset_x*0.5+offset_y)
+            self._svg.add_text_element(pos, c, font_size=offset_x*0.5)
     
     '''
     trace:TableTrace 表格的跟踪器对象。
@@ -92,7 +104,9 @@ class Table():
     '''
     trace_color:(R,G,B) 将要被删除的表格跟踪器对象的颜色。
     '''
-    def delete_trace(self, trace_color):
-        for gid in range(self._row*self._col):
-            if self._cell_tcs[gid].remove(trace_color):
-                self._svg.update_rect_element(gid, fill=self._cell_tcs[gid].color())
+    def delete_trace(self, trace):
+        if trace._hold:
+            for gid in range(self._row*self._col):
+                if self._cell_tcs[gid].remove(trace._color):
+                    self._svg.update_rect_element(gid, fill=self._cell_tcs[gid].color())
+        self._trace_color.remove(trace._color)

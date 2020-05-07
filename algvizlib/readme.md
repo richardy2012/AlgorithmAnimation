@@ -2,7 +2,7 @@
 
 ## 文件目录
 + algviz/ 绘图相关代码：
-    + `algviz.py` 定义基本数据结构（拓扑图、表格）的交互接口。
+    + `visual.py` 定义基本数据结构（拓扑图、表格）的交互接口。
     + `graph.py` 绘制拓扑图。
     + `table.py` 绘制二维表格。
     + `vector.py` 绘制一维数组。
@@ -14,7 +14,7 @@
     + `test_svg_table.ipynb` 测试`svg_table.py`中各接口功能是否正常。
     + `test_table.ipynb` 测试`table.py`中各接口功能是否正常。
     + `test_vector.ipynb` 测试`vector.py`中各接口功能是否正常。
-    + `test_algviz.ipynb` 测试`algviz.py`中各接口功能是否正常。
+    + `test_viusal.ipynb` 测试`visual.py`中各接口功能是否正常。
 
 ## 前提条件
 

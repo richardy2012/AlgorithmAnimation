@@ -14,6 +14,7 @@ class SvgTable():
         self._svg = self._dom.createElement('svg')
         self._svg.setAttribute('width', '{:.0f}pt'.format(width))
         self._svg.setAttribute('height', '{:.0f}pt'.format(height))
+        self._svg.setAttribute('viewBox', '0.00 0.00 {:.2f} {:.2f}'.format(width+3, height+3))
         self._svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
         self._dom.appendChild(self._svg)
 
@@ -24,6 +25,7 @@ class SvgTable():
     def update_svg_size(self, width, height):
         self._svg.setAttribute('width', '{:.0f}pt'.format(width))
         self._svg.setAttribute('height', '{:.0f}pt'.format(height))
+        self._svg.setAttribute('viewBox', '0.00 0.00 {:.2f} {:.2f}'.format(width+3, height+3))
         
     '''
     rect:(x, y, w, h) 矩形左下角坐标和矩形尺寸。
@@ -61,6 +63,30 @@ class SvgTable():
             tt = self._dom.createTextNode('{}'.format(text))
             t.appendChild(tt)
             g.appendChild(t)
+        return int(gid)
+    
+    '''
+    pos:(x,y) 文本中心位置。
+    text:str 文本内容。
+    font_size:int 字体大小。
+    fill:(R,G,B) 字体轮廓颜色。
+    '''
+    def add_text_element(self, pos, text, font_size=16, fill=(123,123,123)):
+        gid = str(self._cur_id)
+        self._cur_id += 1
+        g = self._dom.createElement('g')
+        g.setAttribute('id', gid)
+        self._svg.appendChild(g)
+        t = self._dom.createElement('text')
+        t.setAttribute('alignment-baseline', 'middle')
+        t.setAttribute('text-anchor', 'middle')
+        t.setAttribute('x', '{:.2f}'.format(pos[0]))
+        t.setAttribute('y', '{:.2f}'.format(pos[1]))
+        t.setAttribute('font-size', '{:.2f}'.format(font_size))
+        t.setAttribute('fill', util.rgbcolor2str(fill))
+        tt = self._dom.createTextNode('{}'.format(text))
+        t.appendChild(tt)
+        g.appendChild(t)
         return int(gid)
     
     '''
@@ -123,9 +149,9 @@ class SvgTable():
             r.setAttribute('stroke', util.rgbcolor2str(stroke))
     
     '''
-    gid:int要删除的矩形元素的ID值。
+    gid:int 要删除的元素的ID值。
     '''
-    def delete_rect_element(self, gid):
+    def delete_element(self, gid):
         g = util.find_tag_by_id(self._svg, 'g', str(gid))
         if g is not None:
             self._svg.removeChild(g)
