@@ -14,7 +14,7 @@ class SvgTable():
         self._svg = self._dom.createElement('svg')
         self._svg.setAttribute('width', '{:.0f}pt'.format(width))
         self._svg.setAttribute('height', '{:.0f}pt'.format(height))
-        self._svg.setAttribute('viewBox', '0.00 0.00 {:.2f} {:.2f}'.format(width+3, height+3))
+        self._svg.setAttribute('viewBox', '0.00 0.00 {:.2f} {:.2f}'.format(width, height))
         self._svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
         self._dom.appendChild(self._svg)
 
@@ -25,7 +25,7 @@ class SvgTable():
     def update_svg_size(self, width, height):
         self._svg.setAttribute('width', '{:.0f}pt'.format(width))
         self._svg.setAttribute('height', '{:.0f}pt'.format(height))
-        self._svg.setAttribute('viewBox', '0.00 0.00 {:.2f} {:.2f}'.format(width+3, height+3))
+        self._svg.setAttribute('viewBox', '0.00 0.00 {:.2f} {:.2f}'.format(width, height))
         
     '''
     rect:(x, y, w, h) 矩形左下角坐标和矩形尺寸。
@@ -66,7 +66,7 @@ class SvgTable():
         return int(gid)
     
     '''
-    pos:(x,y) 文本中心位置。
+    pos:(x,y) 文本左下角坐标位置。
     text:str 文本内容。
     font_size:int 字体大小。
     fill:(R,G,B) 字体轮廓颜色。
@@ -78,8 +78,6 @@ class SvgTable():
         g.setAttribute('id', gid)
         self._svg.appendChild(g)
         t = self._dom.createElement('text')
-        t.setAttribute('alignment-baseline', 'middle')
-        t.setAttribute('text-anchor', 'middle')
         t.setAttribute('x', '{:.2f}'.format(pos[0]))
         t.setAttribute('y', '{:.2f}'.format(pos[1]))
         t.setAttribute('font-size', '{:.2f}'.format(font_size))

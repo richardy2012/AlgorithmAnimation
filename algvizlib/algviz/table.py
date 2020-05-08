@@ -27,10 +27,10 @@ class Table():
     col:int 表格列数。
     data:list(list(...)) 初始化数据。
     cell_size:float 单元格宽度。
-    display_id:int 刷新显示所用的id值。
-    name:str 表格的名字。
     '''
-    def __init__(self, row, col, data, cell_size, name):
+    def __init__(self, row, col, data, cell_size):
+        if row <=0 or col <=0:
+            raise Exception('Table init error!')
         self._row = row
         self._col = col
         self._cell_tcs = dict()           # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
@@ -41,25 +41,20 @@ class Table():
             self._data = [[None for _ in range(col)] for _ in range(row)]
         else:
             self._data = data
-        offset_x, offset_y = 0, 0
-        if name is not None:
-            offset_y = util.text_font_size(cell_size*col, name)+3
-        offset_x = min(24, cell_size)
-        self._svg = svgtab.SvgTable(col*cell_size+offset_x, row*cell_size+offset_y+offset_x)
+        label_font_size = int(min(12, cell_size/len(str(max(row,col)-1))))
+        table_margin = 3
+        self._svg = svgtab.SvgTable(col*cell_size+label_font_size*len(str(row-1))+table_margin*2, row*cell_size+label_font_size+table_margin*2)
         for r in range(self._row):
             for c in range(self._col):
-                rect = (c*cell_size+offset_x, r*cell_size+offset_y, cell_size, cell_size)
+                rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = util.TraceColorStack()
-        if name is not None:
-            pos = (col*cell_size*0.5+offset_x, offset_y*0.5)
-            self._svg.add_text_element(pos, name, font_size=offset_y-3, fill=(0,0,0))
         for r in range(row):
-            pos = (offset_x*0.5, r*cell_size+cell_size*0.5+offset_y)
-            self._svg.add_text_element(pos, r, font_size=offset_x*0.5)
+            pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
+            self._svg.add_text_element(pos, r, font_size=label_font_size)
         for c in range(col):
-            pos = (c*cell_size+cell_size*0.5+offset_x, row*cell_size+offset_x*0.5+offset_y)
-            self._svg.add_text_element(pos, c, font_size=offset_x*0.5)
+            pos = ((c+0.5)*cell_size-label_font_size*len(str(c))*0.25+table_margin, row*cell_size+1+label_font_size+table_margin)
+            self._svg.add_text_element(pos, c, font_size=label_font_size)
     
     '''
     trace:TableTrace 表格的跟踪器对象。

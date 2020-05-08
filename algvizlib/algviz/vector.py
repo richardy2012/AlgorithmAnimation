@@ -25,7 +25,7 @@ class Vector():
     delay:float 动画延时。
     cell_size:float 单元格宽度。
     '''
-    def __init__(self, data, delay, cell_size, name):
+    def __init__(self, data, delay, cell_size):
         if not isinstance(data, list):
             return
         self._data = data               # 保存数组中的数据。
@@ -41,22 +41,15 @@ class Vector():
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
         self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
         self._trace_color = set()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
-        self._offset_x = 0
-        if name is not None:
-            self._offset_x = min(50, cell_size*2)
-        self._label_font_size = min(12, cell_size)
-        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin+self._offset_x, cell_size+2*self._cell_margin+self._label_font_size)
+        self._label_font_size = int(min(12, cell_size*0.5))
+        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, cell_size+2*self._cell_margin+self._label_font_size)
         for i in range(len(data)):
-            rect = (cell_size*i+self._cell_margin*(i+1)+self._offset_x, self._cell_margin, cell_size, cell_size)
+            rect = (cell_size*i+self._cell_margin*(i+1), self._cell_margin, cell_size, cell_size)
             rid = self._svg.add_rect_element(rect, text=data[i])
             self._cell_tcs[rid] = util.TraceColorStack()
             self._index2rect[i] = rid
-        if name is not None:
-            pos = (self._offset_x*0.5, cell_size*0.5+self._cell_margin)
-            font_size = util.text_font_size(self._offset_x, name)
-            self._svg.add_text_element(pos, name, font_size=font_size, fill=(0,0,0))
         for i in range(len(data)):
-            pos = (cell_size*i+self._cell_margin*(i+1)+self._offset_x+cell_size*0.5, self._cell_margin*2+cell_size+self._label_font_size*0.5)
+            pos = (cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*len(str(i))*0.25, self._cell_margin*2+cell_size+self._label_font_size)
             tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
             self._index2text.append(tid)
     
@@ -99,7 +92,7 @@ class Vector():
         elif trace.i >= len(self._data):
             trace.i = len(self._data)
         # 向svg中添加新的矩形节点和动画。
-        rect = (self._cell_size*trace.i+self._cell_margin*(trace.i+1)+self._offset_x, self._cell_margin, self._cell_size, self._cell_size)
+        rect = (self._cell_size*trace.i+self._cell_margin*(trace.i+1), self._cell_margin, self._cell_size, self._cell_size)
         rid = self._svg.add_rect_element(rect, text=val)
         self._svg.add_animate_appear(rid, (0, self._delay))
         # 记录插入位置以后的矩形的移动。
@@ -146,7 +139,7 @@ class Vector():
     def _repr_svg_(self):
         # 更新矩形跟踪器的颜色。
         nb_elem = len(self._data) + len(self._rect_disappear)
-        self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin+self._offset_x, self._cell_size+2*self._cell_margin+self._label_font_size)
+        self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin, self._cell_size+2*self._cell_margin+self._label_font_size)
         for (rid, color) in self._frame_trace_old:
             self._cell_tcs[rid].remove(color)
             self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
@@ -167,7 +160,7 @@ class Vector():
                 self._index2text.pop()
         elif len(self._index2text) < len(self._data):
             for i in range(len(self._index2text), len(self._data)):
-                pos = (self._cell_size*i+self._cell_margin*(i+1)+self._offset_x+self._cell_size*0.5, self._cell_margin*2+self._cell_size+self._label_font_size*0.5)
+                pos = (self._cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*0.25*len(str(i)), self._cell_margin*2+self._cell_size+self._label_font_size)
                 tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
                 self._index2text.append(tid)
         res = self._svg._repr_svg_()

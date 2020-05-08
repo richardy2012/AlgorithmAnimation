@@ -6,6 +6,7 @@ from IPython import display
 import table
 import vector
 import graph
+import svg_table as svgtab
 
 class _NoDisplay():
     def _repr_svg_(self):
@@ -13,9 +14,12 @@ class _NoDisplay():
 
 class Visualizer():
     
-    def __init__(self):
+    '''
+    delay:float 延时时间长度。
+    '''
+    def __init__(self, delay = 3.0):
         self._next_display_id = 0
-        self._animate_delay = 3.0
+        self._animate_delay = delay
         self._trace_color_list = [
             (211, 211, 211), # LightGray
             (245, 222, 179), # Wheat
@@ -27,13 +31,8 @@ class Visualizer():
             (255, 193, 37),  # Goldenrod
         ]
         self._element2display = weakref.WeakKeyDictionary() # 显示对象到显示id的映射关系。
-        self._displayed = set()    # 记录已经被显示的id，若id未被显示，调用display接口，否则调用update接口。
-
-    '''
-    val:float 设置动画延时时长。
-    '''
-    def setAnimateDelay(self, val):
-        self._animate_delay = val
+        self._displayed = set()        # 记录已经被显示的id，若id未被显示，调用display接口，否则调用update接口。
+        self._displayid2name = dict()  # 记录对象显示id和对象名称之间的映射关系。
         
     '''
     功能：刷新所有已创建的显示对象。
@@ -42,6 +41,10 @@ class Visualizer():
         for elem in self._element2display.keyrefs():
             did = self._element2display[elem()]
             if did not in self._displayed:
+                if did in self._displayid2name:
+                    svg_title = svgtab.SvgTable(200, 20)
+                    svg_title.add_text_element((3, 16), '{}:'.format(self._displayid2name[did]), font_size=16, fill=(0,0,0))
+                    display.display(svg_title, display_id='algviz_{}'.format(did))
                 display.display(elem(), display_id='algviz{}'.format(did))
                 self._displayed.add(did)
             else:
@@ -49,8 +52,9 @@ class Visualizer():
         temp_displayed = list(self._displayed)
         for did in temp_displayed:
             if did not in self._element2display.values():
-                display.update_display(_NoDisplay() ,display_id='algviz_{}'.format(did))
-                display.update_display(_NoDisplay() ,display_id='algviz{}'.format(did))
+                if did in self._displayid2name:
+                    display.update_display(_NoDisplay(), display_id='algviz_{}'.format(did))
+                display.update_display(_NoDisplay(), display_id='algviz{}'.format(did))
                 self._displayed.remove(did)
         time.sleep(self._animate_delay)
         
@@ -62,8 +66,10 @@ class Visualizer():
     返回：创建的表格对象。
     '''
     def createTable(self, row, col, data=None, cell_size=40, name=None):
-        tab = table.Table(row, col, data, cell_size, name)
+        tab = table.Table(row, col, data, cell_size)
         self._element2display[tab] = self._next_display_id
+        if name is not None:
+            self._displayid2name[self._next_display_id]=name
         self._next_display_id += 1
         return tab
 
@@ -74,8 +80,10 @@ class Visualizer():
     返回：创建的向量对象。
     '''
     def createVector(self, data, cell_size=50, name=None):
-        vec = vector.Vector(data, self._animate_delay, cell_size, name)
+        vec = vector.Vector(data, self._animate_delay, cell_size)
         self._element2display[vec] = self._next_display_id
+        if name is not None:
+            self._displayid2name[self._next_display_id]=name
         self._next_display_id += 1
         return vec
 
