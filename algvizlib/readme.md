@@ -3,11 +3,13 @@
 ## 文件目录
 + algviz/ 绘图相关代码：
     + `visual.py` 定义基本数据结构（拓扑图、表格）的交互接口。
-    + `graph.py` 绘制拓扑图。
+    + `graph.py` 各种拓扑图节点和跟踪器定义。
+    + `tree.py` 各种树节点和跟踪器定义。
+    + `link_list.py` 各种链表节点和跟踪器定义。
     + `table.py` 绘制二维表格。
     + `vector.py` 绘制一维数组。
     + `svg_table.py` 创建矩形列表形式的svg对象。
-    + `svg_graph.py` 解析拓扑图的svg对象。
+    + `svg_graph.py` 解析拓扑图的svg对象并添加动画效果。
     + `utility.py` 定义一些公共函数。
     + `__init__.py` 表示该文件是一个包。
 + test/ 测试相关代码：
@@ -54,9 +56,9 @@
 
 ### 拓扑图
 
-+ 数据结构的设计：
++ 数据结构和接口的设计：
     + 申请一个Graph对象，并将拓扑图中节点和边的数据保存在对象中类似邻接表的数据结构中。初始化时传入图的基本拓扑结构，后续进行添加和删除操作。
-    + Trace用来保存图中节点值，和其邻居节点。当访问节点值或邻居值时，通过Trace调用Graph中的相应接口，并对相应节点和边进行染色。当向Trace中添加子节点时，需要在Graph的数据结构中添加相应的节点和边，并在刷新Graph时更新拓扑图。
+    + Trace用来保存图中节点值，和其邻居节点。当访问节点值或邻居值时，通过Trace调用Graph中的相应接口，并对相应节点和边进行染色。当向Trace中添加子节点时，需要在Graph的数据结构中添加相应的节点和边，并在刷新Graph时更新拓扑图。使用`__getattribute__(self, name)`和`__setattr__(self, name, value)`来重载跟踪器中属性的访问。
 
 
 + 拓扑图的显示
@@ -114,6 +116,6 @@
 
 + 编程接口设计时需要用到Python的弱引用技术，这里使用`WeakKeyDictionary`类(参考：[Python官方](https://docs.python.org/3.1/library/weakref.html)，[简书](https://www.jianshu.com/p/0cecea85ae3b))。
 
-+ Python自定义Class中的运算符重载（参考：[简书](https://www.jianshu.com/p/8a51e384b5f3)）。
++ Python自定义Class中的运算符重载（参考：[简书](https://www.jianshu.com/p/8a51e384b5f3)，[CSDN博客](https://blog.csdn.net/goodlixueyong/article/details/52589979)，[装饰器介绍](https://www.cnblogs.com/Jimmy1988/p/6808237.html)）。
 
 + Graphviz绘图库实现拓扑图绘制（参考：[Python官方接口介绍](https://graphviz.readthedocs.io/en/stable/manual.html)，[Python官方例子](https://graphviz.readthedocs.io/en/stable/examples.html)）
