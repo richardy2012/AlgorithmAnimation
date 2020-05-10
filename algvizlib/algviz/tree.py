@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import svg_graph
+
 '''
 二叉树节点的定义。
 '''
@@ -20,7 +22,7 @@ class BinaryTreeNode:
 '''
 class BinaryTreeTrace:
     '''
-    graph:Graph 绑定要显示的图对象。
+    graph:SvgGraph 绑定要显示的图对象。
     color:(R,G,B) 跟踪器所在节点的RGB背景颜色。
     hold:bool 是否一直保留轨迹。
     node:BinaryTreeNode 初始化跟踪的二叉树节点。
