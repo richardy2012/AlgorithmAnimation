@@ -9,7 +9,10 @@ class GraphNode():
         self.neighbors = neighbors
         
     def _neighbor_(self):
-        return self.neighbors
+        res = list()
+        for child in self.children:
+            res.append((child, None))
+        return res
 
 '''
 图节点跟踪器定义。

@@ -15,7 +15,7 @@ class BinaryTreeNode:
         self.right = None
         
     def _neighbors_(self):
-        return (self.left, self.right)
+        return ((self.left, None), (self.right, None))
 
 '''
 二叉树跟踪器的定义。
@@ -48,7 +48,10 @@ class MultiTreeNode:
         self.children = children
         
     def _neighbors_(self):
-        return self.children
+        res = list()
+        for child in self.children:
+            res.append((child, None))
+        return res
 
 '''
 多叉树跟踪器的定义。

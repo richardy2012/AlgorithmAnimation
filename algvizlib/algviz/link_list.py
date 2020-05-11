@@ -9,7 +9,7 @@ class ForwardListNode():
         self.next = None
 
     def _neighbors_(self):
-        return (self.next)
+        return ((self.next, None))
         
 '''
 前向链表跟踪器定义。
@@ -27,7 +27,7 @@ class DoublyListNode():
         self.next = None
         
     def _neighbors_(self):
-        return (self.prev, self.next)
+        return ((self.prev, None), (self.next, None))
 
 '''
 双向链表跟踪器定义。
