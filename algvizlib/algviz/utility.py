@@ -49,14 +49,14 @@ class ConsecutiveIdMap():
         self._offset = offset
         self._next_id = offset
         self._attr2id = dict()
-        self._id2atrr = list()
+        self._id2attr = list()
     
     '''
     attr_id:... 无序ID值。
     返回:int 连续ID值。
     '''
-    def toConsecutiveId(attr_id):
-        if attr_id in self._attr2id.values():
+    def toConsecutiveId(self, attr_id):
+        if attr_id in self._attr2id.keys():
             return self._attr2id[attr_id]
         else:
             self._attr2id[attr_id] = self._next_id
@@ -68,8 +68,8 @@ class ConsecutiveIdMap():
     cons_id:int 连续ID值。
     返回:... 无序ID值。
     '''
-    def toAttributeId(cons_id):
-        return self._id2key[cons_id - self._offset]
+    def toAttributeId(self, cons_id):
+        return self._id2attr[cons_id - self._offset]
     
 '''
 node:在node的子树中查找满足条件的节点。
