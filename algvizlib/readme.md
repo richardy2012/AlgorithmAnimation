@@ -17,6 +17,7 @@
     + `test_table.ipynb` 测试`table.py`中各接口功能是否正常。
     + `test_vector.ipynb` 测试`vector.py`中各接口功能是否正常。
     + `test_viusal.ipynb` 测试`visual.py`中各接口功能是否正常。
+    + `test_tree.ipynb` 测试`tree.py`和`svg_graph.py`中各接口功能是否正常。
 
 ## 前提条件
 
@@ -80,7 +81,7 @@
 + 使用二维的list来保存表格，表格的长度。
 + Tracer用来表示表格行和列的索引，使用自定义对象。
 + 使用不同颜色的tracer来标记表格中被访问过的单元格。
-    + Tracer的颜色混合策略（目前采用正片垫底的策略）。参考资料：[rgb颜色混合](https://www.jianshu.com/p/6d9a3f39bb53)
+    + Tracer的颜色混合策略（目前采用正片垫底的策略）。
 
 ### 向量
 
@@ -110,12 +111,14 @@
 
 ## 参考资料
 
++ 颜色的表示和混合策略（参考：[rgb颜色混合](https://www.jianshu.com/p/6d9a3f39bb53)）。
+
 + 直接对SVG对象进行操作和更新，需要用到python的xml解析库（参考：[菜鸟教程](https://www.runoob.com/python3/python3-xml-processing.html)、[Python官方文档](https://docs.python.org/3/library/xml.dom.html)）。
 
 + 使用SVG SMIL强大的效果来产生动画（参考：[学长的博客](https://www.zhangxinxu.com/wordpress/2014/08/so-powerful-SVG-smil-animation/)、[浏览器内核官方文档](https://developer.mozilla.org/zh-CN/docs/Web/SVG/SVG_animation_with_SMIL)、[贝塞尔曲线介绍](https://www.zhangxinxu.com/wordpress/2014/06/deep-understand-SVG-path-bezier-curves-command/)）。
 
 + 编程接口设计时需要用到Python的弱引用技术，这里使用`WeakKeyDictionary`类(参考：[Python官方](https://docs.python.org/3.1/library/weakref.html)，[简书](https://www.jianshu.com/p/0cecea85ae3b))。
 
-+ Python自定义Class中的运算符重载（参考：[简书](https://www.jianshu.com/p/8a51e384b5f3)，[CSDN博客](https://blog.csdn.net/goodlixueyong/article/details/52589979)，[装饰器介绍](https://www.cnblogs.com/Jimmy1988/p/6808237.html)）。
++ Python自定义Class中的运算符重载（参考：[简书](https://www.jianshu.com/p/8a51e384b5f3)，[CSDN博客](https://blog.csdn.net/goodlixueyong/article/details/52589979)，[装饰器介绍](https://www.cnblogs.com/Jimmy1988/p/6808237.html)，[博客园](https://www.cnblogs.com/saolv/p/6890645.html)）。
 
-+ Graphviz绘图库实现拓扑图绘制（参考：[Python官方接口介绍](https://graphviz.readthedocs.io/en/stable/manual.html)，[Python官方例子](https://graphviz.readthedocs.io/en/stable/examples.html)）
++ Graphviz绘图库实现拓扑图绘制（参考：[Python官方接口介绍](https://graphviz.readthedocs.io/en/stable/manual.html)，[Python官方例子](https://graphviz.readthedocs.io/en/stable/examples.html)，[博客园](https://www.cnblogs.com/shuqin/p/11897207.html)）

@@ -23,38 +23,42 @@ class BinaryTreeNode:
 '''
 class BinaryTreeTrace:
     '''
+    node:BinaryTreeNode 初始化跟踪的二叉树节点。
     graph:SvgGraph 绑定要显示的图对象。
     color:(R,G,B) 跟踪器所在节点的RGB背景颜色。
     hold:bool 是否一直保留轨迹。
-    node:BinaryTreeNode 初始化跟踪的二叉树节点。
     '''
-    def __init__(self, graph, color, hold, node):
+    def __init__(self, node, graph, color, hold):
         self._graph = graph
         self._node = node
         self._color = color
         self._hold = hold
     
     def __getattribute__(self, name):
-        self._graph.trace_visit(self._node, self._color, self._hold)
         if name == 'val':
-            return self._node.val
+            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+            return super().__getattribute__('_node').val
         elif name == 'left':
-            return self._node.left
+            return super().__getattribute__('_node').left
         elif name == 'right':
-            return self._node.right
+            return super().__getattribute__('_node').right
+        else:
+            return super().__getattribute__(name)
     
     def __setattr__(self, name, value):
-        self._graph.trace_visit(self._node, self._color, self._hold)
         if name == 'val':
-            self._node.val = value
+            setattr(self._node, 'val', value)
+            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         elif name == 'left':
-            self._graph.delete_node(self._node.left, True)
-            self._graph.add_node(value, self._node, True)
-            self._node.left = value
+            self._graph.delete_node(super().__getattribute__('_node').left, True)
+            setattr(self._node, 'left', value)
+            self._graph.add_node(value, super().__getattribute__('_node'), True)
         elif name == 'right':
-            self._graph.delete_node(self._node.right, True)
-            self._graph.add_node(value, self._node, True)
-            self._node.right = value
+            self._graph.delete_node(super().__getattribute__('_node').right, True)
+            setattr(self._node, 'right', value)
+            self._graph.add_node(value, super().__getattribute__('_node'), True)
+        else:
+            super().__setattr__(name, value)
 
 '''
 tree:str 表示二叉树的字符串，必须给出树中的每个节点标签，空节点使用null代替。

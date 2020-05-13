@@ -6,23 +6,24 @@ import xml.dom.minidom as xmldom
 管理一个元素上的多个颜色，执行颜色融合操作等。
 '''
 class TraceColorStack():
-    def __init__(self):
-        self.colors = list()
+    def __init__(self, bgcolor=(255, 255, 255)):
+        self._colors = list()
+        self._bgcolor = bgcolor
     
     '''
     color:(R,G,B)待添加的颜色值，stack中已有的颜色值将不能添加进去。
     '''
     def add(self, color):
-        if color not in self.colors:
-            self.colors.append(color)
+        if color not in self._colors:
+            self._colors.append(color)
     
     '''
     color:(R,G,B)待删除的颜色值。
     返回值：(bool)False：color不在列表中；True：成功删除颜色。
     '''
     def remove(self, color):
-        if color in self.colors:
-            self.colors.remove(color)
+        if color in self._colors:
+            self._colors.remove(color)
             return True
         else:
             return False
@@ -31,8 +32,10 @@ class TraceColorStack():
     返回：融合后的颜色值(R,G,B)。
     '''
     def color(self):
+        if len(self._colors) == 0:
+            return self._bgcolor
         r, g, b = 255, 255, 255
-        for (rr, gg, bb) in self.colors:
+        for (rr, gg, bb) in self._colors:
             r *= rr / 255
             g *= gg / 255
             b *= bb / 255
