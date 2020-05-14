@@ -33,6 +33,10 @@ class BinaryTreeTrace:
         self._node = node
         self._color = color
         self._hold = hold
+        
+    def __call__(self, node):
+        super().__setattr__('_node', node)
+        return self
     
     def __getattribute__(self, name):
         if name == 'val':

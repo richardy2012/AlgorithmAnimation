@@ -179,8 +179,11 @@ class SvgGraph():
     '''
     def _update_edge_color_(self, edge, color):
         if edge is not None:
+            path = edge.getElementsByTagName('path')[0]
+            path.setAttribute('stroke', util.rgbcolor2str(color))
             polygon = edge.getElementsByTagName('polygon')[0]
             polygon.setAttribute('fill', util.rgbcolor2str(color))
+            polygon.setAttribute('stroke', util.rgbcolor2str(color))
     
     '''
     功能：更新拓扑图中节点的标签值。
@@ -201,9 +204,10 @@ class SvgGraph():
         t = self._svg.createElement('text')
         t.setAttribute('alignment-baseline', 'middle')
         t.setAttribute('text-anchor', 'middle')
+        t.setAttribute('font-family', 'Times,serif')
         t.setAttribute('x', '{:.2f}'.format(cx))
         t.setAttribute('y', '{:.2f}'.format(cy))
-        font_size = min(12, util.text_font_size(2*rx, '{}'.format(text)))
+        font_size = min(14, util.text_font_size(2*rx, '{}'.format(text)))
         t.setAttribute('font-size', '{:.2f}'.format(font_size))
         t.setAttribute('fill', util.auto_text_color(fc))
         tt = self._svg.createTextNode('{}'.format(text))
@@ -292,13 +296,12 @@ class SvgGraph():
     new_svg:xmldom.Document 最新的SVG对象。
     '''
     def _update_svg_nodes_(self, new_svg, node_idmap):
+        #import pdb;pdb.set_trace()
         old_pos = self._get_node_pos_(self._svg)
         new_pos = self._get_node_pos_(new_svg)
         for old_node_id in old_pos.keys():
             old_nid = self._node_idmap.toAttributeId(old_node_id)    # 在内存中的ID值。
             if old_nid in node_idmap._attr2id.keys():
-                import pdb;pdb.set_trace()
-                # TODO 调试移动位置出错的bug。
                 # 添加图节点的移动动画效果。
                 new_node_id = node_idmap.toConsecutiveId(old_nid)
                 delt_x = new_pos[new_node_id][1] - old_pos[old_node_id][1]
@@ -334,7 +337,7 @@ class SvgGraph():
         translate_index = transform.find('translate')
         delt_x, delt_y = 0, 0
         if translate_index != -1:
-            st = transform.find('(', translate_index)+1
+            st = transform.find('(', translate_index) + 1
             ed = transform.find(')', translate_index)
             translate = transform[st:ed].split(' ')
             delt_x, delt_y = float(translate[0]), float(translate[1])
@@ -344,8 +347,8 @@ class SvgGraph():
             if node.getAttribute('class') == 'node':
                 node_id = int(node.getAttribute('id')[4:])
                 ellipse = node.getElementsByTagName('ellipse')[0]
-                cx = float(ellipse.getAttribute('cx')) - delt_x
-                cy = float(ellipse.getAttribute('cy')) - delt_y
+                cx = float(ellipse.getAttribute('cx')) + delt_x
+                cy = float(ellipse.getAttribute('cy')) + delt_y
                 positions[node_id] = (node, cx, cy)
         return positions
     
