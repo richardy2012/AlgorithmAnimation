@@ -3,10 +3,14 @@
 import weakref
 import time
 from IPython import display
+
 import table
 import vector
 import graph
-import svg_table as svgtab
+import tree
+import link_list
+import svg_graph
+import svg_table
 
 class _NoDisplay():
     def _repr_svg_(self):
@@ -42,7 +46,7 @@ class Visualizer():
             did = self._element2display[elem()]
             if did not in self._displayed:
                 if did in self._displayid2name:
-                    svg_title = svgtab.SvgTable(200, 20)
+                    svg_title = svg_table.SvgTable(200, 20)
                     svg_title.add_text_element((3, 16), '{}:'.format(self._displayid2name[did]), font_size=16, fill=(0,0,0))
                     display.display(svg_title, display_id='algviz_{}'.format(did))
                 display.display(elem(), display_id='algviz{}'.format(did))
@@ -88,27 +92,27 @@ class Visualizer():
         return vec
 
     '''
-    返回：创建的单向列表对象。
+    返回：创建的拓扑图可视化对象。
     '''
-    def createForwardList(self):
+    def createGraph(self, directed=True, horizontal=False, data=None):
         pass
     
     '''
-    返回：创建的双向列表对象。
+    返回：创建的单向列表跟踪器对象。
     '''
-    def createDoubleList(self):
+    def createForwardListTrace(self):
         pass
 
     '''
-    返回：创建的二叉树对象。
+    返回：创建的二叉树跟踪器对象。
     '''
-    def createBinaryTree(self):
+    def createBinaryTreeTrace(self):
         pass
 
     '''
-    返回：创建的拓扑图对象。
+    返回：创建的拓扑图跟踪器对象。
     '''
-    def createGraph(self):
+    def createGraphTrace(self):
         pass
 
     '''

@@ -36,7 +36,15 @@ class BinaryTreeTrace:
         
     def __call__(self, node):
         super().__setattr__('_node', node)
+        self._graph.add_node(node, None, False)
+        self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         return self
+    
+    def __eq__(self, other):
+        return super().__getattribute__('_node') == other
+    
+    def __ne__(self, other):
+        return super().__getattribute__('_node') != other 
     
     def __getattribute__(self, name):
         if name == 'val':
@@ -56,7 +64,8 @@ class BinaryTreeTrace:
         elif name == 'left':
             self._graph.delete_node(super().__getattribute__('_node').left, True)
             setattr(self._node, 'left', value)
-            self._graph.add_node(value, super().__getattribute__('_node'), True)
+            successor = super().__getattribute__('_node').right
+            self._graph.add_node(value, super().__getattribute__('_node'), True, successor=successor)
         elif name == 'right':
             self._graph.delete_node(super().__getattribute__('_node').right, True)
             setattr(self._node, 'right', value)
@@ -94,23 +103,3 @@ def parseBinaryTree(tree):
             cur_node.right = right_node
         index += 2
     return root
-    
-'''
-多叉树节点的定义。
-'''
-class MultiTreeNode:
-    def __init__(self, val, children=list()):
-        self.val = val
-        self.children = children
-        
-    def _neighbors_(self):
-        res = list()
-        for child in self.children:
-            res.append((child, None))
-        return res
-
-'''
-多叉树跟踪器的定义。
-'''
-class MultiTreeTrace:
-    pass
