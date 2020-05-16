@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
 
+import json
+
 '''
 单向链表节点定义。
 '''
 class ForwardListNode():
+    '''
+    val:... 链表节点上要显示的标签值。
+    '''
     def __init__(self, val):
         self.val = val
         self.next = None
 
+    '''
+    返回：下一个节点。
+    '''
     def _neighbors_(self):
-        return ((self.next, None))
+        return [(self.next, None)]
         
 '''
 单向链表跟踪器定义。
@@ -26,35 +34,54 @@ class ForwardListTrace():
         self._node = node
         self._color = color
         self._hold = hold
-        
+        if node is not None:
+            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+    
+    '''
+    node:ForwardListNode 为跟踪器绑定新的单向链表节点。
+    '''
     def __call__(self, node):
         super().__setattr__('_node', node)
         self._graph.add_node(node, None, False)
+        self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         return self
     
+    '''
+    other:ForwardListNode 判断跟踪器所绑定的节点和other是否相同。
+    '''
     def __eq__(self, other):
         return super().__getattribute__('_node') == other
     
+    '''
+    other:ForwardListNode 判断跟踪器所绑定的节点和other是否不同。
+    '''
     def __ne__(self, other):
         return super().__getattribute__('_node') != other 
     
+    '''
+    name:str 访问跟踪器的属性，以及跟踪器所绑定单向链表的val,next属性。
+    '''
     def __getattribute__(self, name):
         if name == 'val':
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
             return super().__getattribute__('_node').val
         elif name == 'next':
             return super().__getattribute__('_node').next
         else:
             return super().__getattribute__(name)
     
+    '''
+    name:str 修改跟踪器的属性，以及跟踪器所绑定单向链表的val,next属性。
+    value:... 新的赋值（对于val,next属性是直接赋值给跟踪器所绑定单向链表中对应的属性）。
+    '''
     def __setattr__(self, name, value):
         if name == 'val':
             setattr(self._node, 'val', value)
             self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         elif name == 'next':
-            self._graph.delete_node(super().__getattribute__('_node').next, True)
-            setattr(self._node, 'right', value)
-            self._graph.add_node(value, super().__getattribute__('_node'), True)
+            node_ = super().__getattribute__('_node')
+            self._graph.remove_edge(node_, node_.next)
+            node_.next = value
+            self._graph.add_node(ndoe_, value)
         else:
             super().__setattr__(name, value)
 
@@ -71,4 +98,4 @@ def parseForwardListNodes(li_str):
     for i in range(1, len(li_vals)):
         cur_node.next = ForwardListNode(li_vals[i])
         cur_node = cur_node.next
-    return cur_node
+    return head

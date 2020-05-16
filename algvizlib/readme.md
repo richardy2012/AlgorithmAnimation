@@ -18,6 +18,8 @@
     + `test_vector.ipynb` 测试`vector.py`中各接口功能是否正常。
     + `test_viusal.ipynb` 测试`visual.py`中各接口功能是否正常。
     + `test_tree.ipynb` 测试`tree.py`和`svg_graph.py`中各接口功能是否正常。
+    + `test_linklist.ipynb`测试`link_list.py`和`svg_graph.py`中各接口功能是否正常。
+    + `test_graph.ipynb`测试`graph.py`和`svg_graph.py`中各接口功能是否正常。
 
 ## 前提条件
 

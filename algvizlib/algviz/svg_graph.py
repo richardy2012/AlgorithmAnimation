@@ -20,8 +20,10 @@ class SvgGraph():
         self._edge_label = dict()       # 拓扑图每条边上要显示的标签信息。
         self._node_tcs = dict()         # 记录所有节点中的轨迹访问信息（节点索引：ColorStack）。
         self._edge_tcs = dict()         # 记录当前拓扑图中所有边的轨迹访问信息（（起点索引，终点索引）：ColorStack）。
-        self._node_appear = set()       # 记录下一帧动画中消失的节点索引集合。
+        self._node_appear = set()       # 记录下一帧动画中出现的节点索引集合。
         self._node_disappear = set()    # 记录下一帧动画中消失的节点索引集合。
+        self._edge_appear = set()       # 记录下一帧动画中出现的边索引集合。
+        self._edge_disappear = set()    # 记录下一帧动画中消失的边索引集合。
         self._node_move = set()         # 记录在动画效果中移动的节点索引集合。
         self._frame_trace_old = list()  # 缓存上一帧需要清除的节点/边相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()      # 记录下一帧待刷新的节点/边相关信息(节点索引，轨迹颜色值，是否持久化)。
@@ -37,11 +39,9 @@ class SvgGraph():
     '''
     node:... 要添加的节点对象，可以是拓扑图/树/链表节点。
     parent:... node的父节点对象，需要与node的类型一致。
-    recursive:bool 是否递归的添加和node相关联的节点。
     successor:... 用于排版定位，表示node的后继节点。
     '''
-    def add_node(self, node, parent, recursive, successor=None):
-        visited = {id(parent)}
+    def add_nodes(self, node, parent, successor=None):
         node_stack = [node]
         temp_edge_label = list()
         if parent is not None and node is not None:
@@ -71,34 +71,48 @@ class SvgGraph():
         for (n1id, n2id, label) in temp_edge_label:
             self._edge_label[(n1id, n2id)] = label
             self._edge_tcs[(n1id, n2id)] = util.TraceColorStack(bgcolor=(123, 123, 123))
+            self._edge_appear.add((n1id, n2id))
+    
+    '''
+    node1:... 要添加边的起点。
+    node2:... 要添加边的终点。
+    label:... 要添加边上的标签信息。
+    '''
+    def add_edge(self, node1, node2, label=None):
+        edge = (id(node1), id(node2))
+        if edge not in self._edge_label:
+            self._edge_label[edge] = label
+            self._edge_tcs[edge] = util.TraceColorStack(bgcolor=(123,123,123))
+            self._edge_appear.add(edge)
+    
+    '''
+    node1:... 要删除边的起点。
+    node2:... 要删除边的终点。
+    '''
+    def remove_edge(self, node1, node2):
+        edge = (id(node1), id(node2))
+        if edge in self._edge_label:
+            self._edge_label.pop(edge)
+            self._edge_tcs.pop(edge)
+            self._edge_disappear.add(edge)
     
     '''
     node:... 要删除的节点对象，可以是拓扑图/树/链表节点。
-    recursive:bool 是否递归的删除和node相关联的节点。
     '''
-    def delete_node(self, node, recursive):
-        visited = set()
-        node_stack = [node]
-        while len(node_stack) > 0:
-            cur_node = node_stack.pop()
-            if cur_node is None or id(cur_node) in visited:
-                continue
-            visited.add(id(cur_node))
-            self._node_label.pop(id(cur_node))
-            self._node_tcs.pop(id(cur_node))
-            self._node_disappear.add(id(cur_node))
-            self._node_seq.remove(id(cur_node))
-            if recursive:
-                for neigh in cur_node._neighbors_():
-                    node_stack.append(neigh[0])
+    def remove_node(self, node):
+        self._node_label.pop(id(cur_node))
+        self._node_tcs.pop(id(cur_node))
+        self._node_disappear.add(id(cur_node))
+        self._node_seq.remove(id(cur_node))
         # 删除所有消失边的标签和轨迹颜色记录。
         temp_remove_edges = list()
         for (n1id, n2id) in self._edge_label.keys():
-            if n1id in self._node_disappear or n2id in self._node_disappear:
+            if n1id == id(node) or n2id == id(node):
                 temp_remove_edges.append((n1id, n2id))
         for k in temp_remove_edges:
             self._edge_label.pop(k)
             self._edge_tcs.pop(k)
+            self._edge_disappear.add(k)
         
     '''
     node:... 跟踪器访问的节点，可以是拓扑图/树/链表节点。
@@ -115,12 +129,13 @@ class SvgGraph():
             return
         self._node_tcs[id(node)].add(color)
         self._frame_trace.append((id(node), color, hold))
-        if color in self._trace_last_visit.keys():
-            edge_key = (self._trace_last_visit[color], id(node))
-            if edge_key in self._edge_tcs.keys():
-                self._edge_tcs[edge_key].add(color)
-                self._frame_trace.append((edge_key, color, hold))
-        self._trace_last_visit[color] = id(node)
+        if hold:
+            if color in self._trace_last_visit.keys():
+                edge_key = (self._trace_last_visit[color], id(node))
+                if edge_key in self._edge_tcs.keys():
+                    self._edge_tcs[edge_key].add(color)
+                    self._frame_trace.append((edge_key, color, hold))
+            self._trace_last_visit[color] = id(node)
     
     '''
     color:(R,G,B) 将要被删除的跟踪器颜色。
@@ -156,6 +171,8 @@ class SvgGraph():
         self._update_svg_edges_(new_svg, edge_idmap)
         self._node_appear.clear()
         self._node_disappear.clear()
+        self._edge_appear.clear()
+        self._edge_disappear.clear()
         self._node_move.clear()
         res = self._svg.toxml()
         # 更新SVG内容，为下一帧做准备。
@@ -283,14 +300,14 @@ class SvgGraph():
         for old_edge_id in old_edges.keys():
             (n1id, n2id) = self._edge_idmap.toAttributeId(old_edge_id)  # 边的（起点，终点）在内存中的ID值。
             # 添加边的消失动画效果。
-            if n1id in self._node_disappear or n2id in self._node_disappear or n1id in self._node_move or n2id in self._node_move:
+            if (n1id, n2id) in self._edge_disappear or n1id in self._node_move or n2id in self._node_move:
                 g = old_edges[old_edge_id]
                 animate = self._svg.createElement('animate')
                 util.add_animate_appear_into_node(g, animate, (0, self._delay), False)
         graph = util.find_tag_by_id(self._svg, 'g', 'graph1')
         for new_edge_id in new_edges.keys():
             (n1id, n2id) = edge_idmap.toAttributeId(new_edge_id)
-            if n1id in self._node_appear or n2id in self._node_appear or n1id in self._node_move or n2id in self._node_move:
+            if (n1id, n2id) in self._edge_disappear or n1id in self._node_move or n2id in self._node_move:
                 old_edge_id = self._edge_idmap.toConsecutiveId((n1id, n2id))
                 clone_edge = new_edges[new_edge_id].cloneNode(deep=True)
                 clone_edge.setAttribute('id', 'edge{}'.format(old_edge_id))

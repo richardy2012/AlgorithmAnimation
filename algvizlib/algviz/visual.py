@@ -92,28 +92,58 @@ class Visualizer():
         return vec
 
     '''
+    directed:bool 是否为有向图。
+    horizontal:bool 图是否横向排版。
+    data:... 拓扑图的初始化数据。
+    name:str 拓扑图的显示名称。
     返回：创建的拓扑图可视化对象。
     '''
-    def createGraph(self, directed=True, horizontal=False, data=None):
-        pass
+    def createGraph(self, directed=True, horizontal=False, data=None, name=None):
+        gra = svg_graph.SvgGraph(data, directed, self._animate_delay, horizontal)
+        self._element2display[gra] = self._next_display_id
+        if name is not None:
+            self._displayid2name[self._next_display_id]=name
+        self._next_display_id += 1
+        return gra
     
     '''
+    gra:SvgGraph 与跟踪器绑定的拓扑图显示对象。
+    hold:bool 是否需要在链表中显示trace经过的路径。
+    node:ForwardListNode 为跟踪器初始化的链表节点。
     返回：创建的单向列表跟踪器对象。
     '''
-    def createForwardListTrace(self):
-        pass
+    def createForwardListTrace(self, gra, hold=False, node=None):
+        pick_color = self._pickTraceColor_(gra)
+        if pick_color is None:
+            raise Exception('Too many traces in graph!')
+        else:
+            return link_list.ForwardListTrace(node, gra, pick_color, hold)
 
     '''
+    gra:SvgGraph 与跟踪器绑定的拓扑图显示对象。
+    hold:bool 是否需要在二叉树中显示trace经过的路径。
+    node:BinaryTreeNode 为跟踪器初始化的二叉树节点。
     返回：创建的二叉树跟踪器对象。
     '''
-    def createBinaryTreeTrace(self):
-        pass
+    def createBinaryTreeTrace(self, gra, hold=False, node=None):
+        pick_color = self._pickTraceColor_(gra)
+        if pick_color is None:
+            raise Exception('Too many traces in graph!')
+        else:
+            return tree.BinaryTreeTrace(node, gra, pick_color, hold)
 
     '''
+    gra:SvgGraph 与跟踪器绑定的拓扑图显示对象。
+    hold:bool 是否需要在拓扑图中显示trace经过的路径。
+    node:GraphNode 为跟踪器初始化的拓扑图节点。
     返回：创建的拓扑图跟踪器对象。
     '''
-    def createGraphTrace(self):
-        pass
+    def createGraphTrace(self, gra, hold=False, node=None):
+        pick_color = self._pickTraceColor_(gra)
+        if pick_color is None:
+            raise Exception('Too many traces in graph!')
+        else:
+            return graph.GraphTrace(node, gra, pick_color, hold)
 
     '''
     table:Table trace将要绑定的table对象。
@@ -122,17 +152,11 @@ class Visualizer():
     返回：TableTrace 跟踪器。
     '''
     def createTableTrace(self, tab, hold=False, r=0, c=0):
-        if len(tab._trace_color) >= len(self._trace_color_list):
+        pick_color = self._pickTraceColor_(tab)
+        if pick_color is None:
             raise Exception('Too many traces in table!')
         else:
-            pick_color = None
-            for i in range(len(self._trace_color_list)):
-                pick_color = self._trace_color_list[i]
-                if pick_color not in tab._trace_color:
-                    break
-            tab._trace_color.add(pick_color)
-            trace = table.TableTrace(tab, pick_color, hold, r, c)
-            return trace
+            return table.TableTrace(tab, pick_color, hold, r, c)
 
     '''
     vec:Vector trace将要绑定的vector对象。
@@ -140,14 +164,23 @@ class Visualizer():
     i:int 跟踪器初始索引位置。
     '''
     def createVectorTrace(self, vec, hold=False, i=0):
-        if len(vec._trace_color) >= len(self._trace_color_list):
+        pick_color = self._pickTraceColor_(vec)
+        if pick_color is None:
             raise Exception('Too many traces in vector!')
+        else:
+            return vector.VectorTrace(vec, pick_color, hold, i)
+
+    '''
+    show_obj:... 可视化对象（该函数自动为可视化对象的跟踪器分配颜色）。
+    '''
+    def _pickTraceColor_(self, show_obj):
+        if len(show_obj._trace_color) >= len(self._trace_color_list):
+            return None
         else:
             pick_color = None
             for i in range(len(self._trace_color_list)):
                 pick_color = self._trace_color_list[i]
-                if pick_color not in vec._trace_color:
+                if pick_color not in show_obj._trace_color:
                     break
-            vec._trace_color.add(pick_color)
-            trace = vector.VectorTrace(vec, pick_color, hold, i)
-            return trace
+            obj._trace_color.add(pick_color)
+            return pick_color

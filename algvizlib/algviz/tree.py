@@ -14,7 +14,10 @@ class BinaryTreeNode:
         self.val = val
         self.left = None
         self.right = None
-        
+    
+    '''
+    返回：左右子节点。
+    '''
     def _neighbors_(self):
         return ((self.left, None), (self.right, None))
 
@@ -33,22 +36,35 @@ class BinaryTreeTrace:
         self._node = node
         self._color = color
         self._hold = hold
-        
+        if node is not None:
+            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+    
+    '''
+    node:BinaryTreeNode 为跟踪器绑定新的二叉树节点。
+    '''
     def __call__(self, node):
         super().__setattr__('_node', node)
         self._graph.add_node(node, None, False)
         self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         return self
     
+    '''
+    other:BinaryTreeNode 判断跟踪器所绑定的节点和other是否相同。
+    '''
     def __eq__(self, other):
         return super().__getattribute__('_node') == other
     
+    '''
+    other:BinaryTreeNode 判断跟踪器所绑定的节点和other是否不同。
+    '''
     def __ne__(self, other):
         return super().__getattribute__('_node') != other 
     
+    '''
+    name:str 访问跟踪器的属性，以及跟踪器所绑定二叉树的节点val,left,right属性。
+    '''
     def __getattribute__(self, name):
         if name == 'val':
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
             return super().__getattribute__('_node').val
         elif name == 'left':
             return super().__getattribute__('_node').left
@@ -57,15 +73,20 @@ class BinaryTreeTrace:
         else:
             return super().__getattribute__(name)
     
+    '''
+    name:str 修改跟踪器的属性，以及跟踪器所绑定二叉树的节点val,left,right属性。
+    value:... 新的赋值（对于val,left,right属性是直接赋值给跟踪器所绑定二叉树中对应的属性）。
+    '''
     def __setattr__(self, name, value):
         if name == 'val':
             setattr(self._node, 'val', value)
             self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         elif name == 'left':
-            self._graph.delete_node(super().__getattribute__('_node').left, True)
+            node_ = super().__getattribute__('_node')
+            self._graph.delete_node(node_, node_.left)
             setattr(self._node, 'left', value)
-            successor = super().__getattribute__('_node').right
-            self._graph.add_node(value, super().__getattribute__('_node'), True, successor=successor)
+            successor = n.right
+            self._graph.add_edge(value, super().__getattribute__('_node'), True, successor=successor)
         elif name == 'right':
             self._graph.delete_node(super().__getattribute__('_node').right, True)
             setattr(self._node, 'right', value)
