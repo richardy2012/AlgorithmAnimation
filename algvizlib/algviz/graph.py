@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import json
+
 '''
 拓扑图节点的定义。
 '''
@@ -41,14 +43,25 @@ class GraphTrace():
         self._node = node
         self._color = color
         self._hold = hold
+        if node is not None:
+            self._graph.add_node(node)
+            self._graph.trace_visit(self._node, self._color, self._hold)
+    
+    '''
+    功能：清除图中跟踪器的轨迹记录。
+    '''
+    def __del__(self):
+        self._graph.delete_trace(self._color, self._hold)
     
     '''
     node:GraphNode 为跟踪器绑定新的拓扑图节点。
     '''
     def __call__(self, node):
+        if type(node) == GraphTrace:
+            node = node._node
         super().__setattr__('_node', node)
-        self._graph.add_node(node, None, False)
-        self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+        self._graph.add_node(node)
+        self._graph.trace_visit(node, self._color, self._hold)
         return self._node
 
     '''
@@ -85,7 +98,7 @@ class GraphTrace():
     def __setattr__(self, name, value):
         if name == 'val':
             setattr(self._node, 'val', value)
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+            self._graph.update_node_label(self._node, value)
         else:
             super().__setattr__(name, value)
 
@@ -108,23 +121,27 @@ class GraphTrace():
         if index < 0:
             raise Exception('Graph index out of range!')
         node = super().__getattribute__('_node')
-        successor = None
-        if index < len(node.neighbors) - 1:
-            successor = node.neighbors[index+1]
         child_node, child_edge = None, None
-        if type(value)==tuple:
+        if type(value) == tuple:
             child_node, child_edge = value[0], value[1]
         else:
             child_node = value
         if index >= len(node.neighbors):
-            self._graph.add_node(child_node, node, False, successor)
+            self._graph.add_node(child_node)
             node.neighbors.append(child_node)
         else:
-            self._graph.delete_node(node.neighbors[index], False)
+            self._graph.add_node(child_node)
             node.neighbors[index] = child_node
-            self._graph.add_node(child_node, node, False, successor)
         if node.edge_infos is not None:
             if index >= len(node.edge_infos):
                 node.edge_infos.append(child_edge)
             else:
                 node.edge_infos[index] = child_edge
+
+'''
+graph_str:str 表示拓扑图邻接表的json字符串。
+directed:bool 该拓扑图是否为有向图。
+返回：拓扑图中根结点，如果是离散的图则返回节点集合。
+'''
+def parseGraph(graph_str, directed=True)
+    pass

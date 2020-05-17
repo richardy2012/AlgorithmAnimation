@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import svg_graph
 import json
 
 '''
@@ -37,19 +36,24 @@ class BinaryTreeTrace:
         self._color = color
         self._hold = hold
         if node is not None:
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+            self._graph.add_node(node)
+            self._graph.trace_visit(self._node, self._color, self._hold)
     
+    '''
+    功能：清除图中跟踪器的轨迹记录。
+    '''
     def __del__(self):
-        graph_ = super().__getattribute__('_graph')
-        graph_.delete_trace(super().__getattribute__('_color'), super().__getattribute__('_hold'))
+        self._graph.delete_trace(self._color, self._hold)
     
     '''
     node:BinaryTreeNode 为跟踪器绑定新的二叉树节点。
     '''
     def __call__(self, node):
+        if type(node) == BinaryTreeTrace:
+            node = node._node
         super().__setattr__('_node', node)
-        self._graph.add_node(node, None)
-        self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+        self._graph.add_node(node)
+        self._graph.trace_visit(node, self._color, self._hold)
         return self
     
     '''
@@ -84,28 +88,26 @@ class BinaryTreeTrace:
     def __setattr__(self, name, value):
         if name == 'val':
             setattr(self._node, 'val', value)
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+            self._graph.update_node_label(self._node, value)
         elif name == 'left':
-            node_ = super().__getattribute__('_node')
-            self._graph.remove_edge(node_, node_.left)
+            if type(value) == BinaryTreeTrace:
+                value = value._node
+            self._graph.add_node(value)
             setattr(self._node, 'left', value)
-            self._graph.add_node(value, node_, node_.right)
-            self._graph.add_edge(node_, value)
         elif name == 'right':
-            node_ = super().__getattribute__('_node')
-            self._graph.remove_edge(node_, node_.right)
+            if type(value) == BinaryTreeTrace:
+                value = value._node
+            self._graph.add_node(value)
             setattr(self._node, 'right', value)
-            self._graph.add_node(value, node_)
-            self._graph.add_edge(node_, value)
         else:
             super().__setattr__(name, value)
 
 '''
-tree:str 表示二叉树的字符串，必须给出树中的每个节点标签，空节点使用null代替。
+tree_str:str 表示二叉树的字符串，必须给出树中的每个节点标签，空节点使用null代替。
 返回：BinaryTreeNode 创建的二叉树的根节点。
 '''
-def parseBinaryTree(tree):
-    node_vals = json.loads(tree)
+def parseBinaryTree(tree_str):
+    node_vals = json.loads(tree_str)
     if len(node_vals) == 0:
         return None
     root = BinaryTreeNode(node_vals[0])

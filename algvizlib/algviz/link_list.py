@@ -35,15 +35,24 @@ class ForwardListTrace():
         self._color = color
         self._hold = hold
         if node is not None:
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+            self._graph.add_node(node)
+            self._graph.trace_visit(self._node, self._color, self._hold)
+    
+    '''
+    功能：清除图中跟踪器的轨迹记录。
+    '''
+    def __del__(self):
+        self._graph.delete_trace(self._color, self._hold)
     
     '''
     node:ForwardListNode 为跟踪器绑定新的单向链表节点。
     '''
     def __call__(self, node):
+        if type(node) == ForwardListTrace:
+            node = node._node
         super().__setattr__('_node', node)
-        self._graph.add_node(node, None, False)
-        self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+        self._graph.add_node(node)
+        self._graph.trace_visit(node, self._color, self._hold)
         return self
     
     '''
@@ -76,12 +85,12 @@ class ForwardListTrace():
     def __setattr__(self, name, value):
         if name == 'val':
             setattr(self._node, 'val', value)
-            self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
+            self._graph.update_node_label(self._node, value)
         elif name == 'next':
-            node_ = super().__getattribute__('_node')
-            self._graph.remove_edge(node_, node_.next)
-            node_.next = value
-            self._graph.add_node(ndoe_, value)
+            if type(value) == ForwardListTrace:
+                value = value._node
+            self._graph.add_node(value)
+            setattr(self._node, 'next', value)
         else:
             super().__setattr__(name, value)
 

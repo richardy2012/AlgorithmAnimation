@@ -42,7 +42,7 @@ class TraceColorStack():
         return (int(r), int(g), int(b))
 
 '''
-将无序的ID值映射到连续的整数空间。
+为可哈希对象分配连续的整数空间。
 '''
 class ConsecutiveIdMap():
     '''

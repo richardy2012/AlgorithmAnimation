@@ -182,5 +182,5 @@ class Visualizer():
                 pick_color = self._trace_color_list[i]
                 if pick_color not in show_obj._trace_color:
                     break
-            obj._trace_color.add(pick_color)
+            show_obj._trace_color.add(pick_color)
             return pick_color
