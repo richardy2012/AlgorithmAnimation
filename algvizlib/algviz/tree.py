@@ -39,12 +39,16 @@ class BinaryTreeTrace:
         if node is not None:
             self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
     
+    def __del__(self):
+        graph_ = super().__getattribute__('_graph')
+        graph_.delete_trace(super().__getattribute__('_color'), super().__getattribute__('_hold'))
+    
     '''
     node:BinaryTreeNode 为跟踪器绑定新的二叉树节点。
     '''
     def __call__(self, node):
         super().__setattr__('_node', node)
-        self._graph.add_node(node, None, False)
+        self._graph.add_node(node, None)
         self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         return self
     
@@ -83,14 +87,16 @@ class BinaryTreeTrace:
             self._graph.trace_visit(super().__getattribute__('_node'), super().__getattribute__('_color'), super().__getattribute__('_hold'))
         elif name == 'left':
             node_ = super().__getattribute__('_node')
-            self._graph.delete_node(node_, node_.left)
+            self._graph.remove_edge(node_, node_.left)
             setattr(self._node, 'left', value)
-            successor = n.right
-            self._graph.add_edge(value, super().__getattribute__('_node'), True, successor=successor)
+            self._graph.add_node(value, node_, node_.right)
+            self._graph.add_edge(node_, value)
         elif name == 'right':
-            self._graph.delete_node(super().__getattribute__('_node').right, True)
+            node_ = super().__getattribute__('_node')
+            self._graph.remove_edge(node_, node_.right)
             setattr(self._node, 'right', value)
-            self._graph.add_node(value, super().__getattribute__('_node'), True)
+            self._graph.add_node(value, node_)
+            self._graph.add_edge(node_, value)
         else:
             super().__setattr__(name, value)
 
