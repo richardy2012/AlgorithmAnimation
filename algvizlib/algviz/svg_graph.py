@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+'''
+@author:zjluestc@outlook.com
+@license:GPLv3
+'''
+
 import graphviz
 import xml.dom.minidom as xmldom
 import utility as util

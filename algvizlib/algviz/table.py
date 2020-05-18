@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+'''
+@author:zjluestc@outlook.com
+@license:GPLv3
+'''
+
 import svg_table as svgtab
 import utility as util
 

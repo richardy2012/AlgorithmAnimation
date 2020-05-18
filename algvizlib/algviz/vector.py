@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+'''
+@author:zjluestc@outlook.com
+@license:GPLv3
+'''
+
 import svg_table as svgtab
 import utility as util
 
@@ -218,14 +223,14 @@ class Vector():
                 x -= self._rect_move[rid] * (self._cell_size+self._cell_margin)
             height = ratio*num
             if num < 0:
-                y = baseline + height
+                y = baseline
             else:
                 y = baseline - height
             if num - int(num) > 0.001:
                 num = '{:.2f}'.format(num)
             else:
                 num = '{:.0f}'.format(num)
-            self._svg.update_rect_element(rid, rect=(x, y, self._cell_size, height), text=num)
+            self._svg.update_rect_element(rid, rect=(x, y, self._cell_size, abs(height)), text=num)
     
     '''
     trace:TableTrace 将要被删除的数组跟踪器对象。
