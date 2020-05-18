@@ -140,21 +140,13 @@ class SvgGraph():
     返回:str 拓扑图SVG显示字符串。
     '''
     def _repr_svg_(self):
-        # 更新节点跟踪器的颜色。
-        self._update_trace_color_()
-        self._traverse_graph_()
-        if len(self._node_appear)==0 and len(self._node_disappear)==0 and len(self._edge_appear)==0 and len(self._edge_disappear)==0:
-            return self._svg.toxml()
         # 对拓扑图进行重新排版并添加动画效果。
+        self._traverse_graph_()
         (new_svg, node_idmap, edge_idmap) = self._create_svg_()
         self._update_svg_size_(new_svg)
         self._update_svg_nodes_(new_svg, node_idmap)
         self._update_svg_edges_(new_svg, edge_idmap)
-        self._node_appear.clear()
-        self._node_disappear.clear()
-        self._edge_appear.clear()
-        self._edge_disappear.clear()
-        self._node_move.clear()
+        self._update_trace_color_()
         res = self._svg.toxml()
         # 更新SVG内容，为下一帧做准备。
         self._svg, self._node_idmap, self._edge_idmap = new_svg, node_idmap, edge_idmap
@@ -166,6 +158,16 @@ class SvgGraph():
         for edge_id in new_edges.keys():
             edge = self._edge_idmap.toAttributeId(edge_id)
             self._update_edge_color_(new_edges[edge_id], self._edge_tcs[edge].color())
+        # 更新辅助数据记录。
+        for node in self._node_disappear:
+            self._node_tcs.pop(node)
+        for edge in self._edge_disappear:
+            self._edge_tcs.pop(edge)
+        self._node_appear.clear()
+        self._node_disappear.clear()
+        self._edge_appear.clear()
+        self._edge_disappear.clear()
+        self._node_move.clear()
         return res
     
     '''
@@ -200,12 +202,8 @@ class SvgGraph():
         for node in self._node_appear:
             if node not in self._node_tcs.keys():
                 self._node_tcs[node] = util.TraceColorStack()
-        for node in self._node_disappear:
-            self._node_tcs.pop(node)
         for edge in self._edge_appear:
             self._edge_tcs[edge] = util.TraceColorStack(bgcolor=(123, 123, 123))
-        for edge in self._edge_disappear:
-            self._edge_tcs.pop(edge)
         # 更新其它辅助信息。
         self._node_seq = new_node_seq
         self._edge_label = new_edge_label
@@ -343,7 +341,9 @@ class SvgGraph():
         for old_node in self._node_appear:
             # 添加图节点的出现动画效果。
             new_node_id = node_idmap.toConsecutiveId(old_node)
+            old_node_id = self._node_idmap.toConsecutiveId(old_node)
             clone_node = new_pos[new_node_id][0].cloneNode(deep=True)
+            clone_node.setAttribute('id', 'node{}'.format(old_node_id))
             graph.appendChild(clone_node)
             animate = self._svg.createElement('animate')
             util.add_animate_appear_into_node(clone_node, animate, (0, self._delay), True)

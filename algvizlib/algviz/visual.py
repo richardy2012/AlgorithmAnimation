@@ -16,13 +16,14 @@ class _NoDisplay():
     def _repr_svg_(self):
         return ''
 
-class Visualizer():
+next_display_id = 0
     
+class Visualizer():
+        
     '''
     delay:float 延时时间长度。
     '''
     def __init__(self, delay = 3.0):
-        self._next_display_id = 0
         self._animate_delay = delay
         self._trace_color_list = [
             (211, 211, 211), # LightGray
@@ -70,11 +71,12 @@ class Visualizer():
     返回：创建的表格对象。
     '''
     def createTable(self, row, col, data=None, cell_size=40, name=None):
+        global next_display_id
         tab = table.Table(row, col, data, cell_size)
-        self._element2display[tab] = self._next_display_id
+        self._element2display[tab] = next_display_id
         if name is not None:
-            self._displayid2name[self._next_display_id]=name
-        self._next_display_id += 1
+            self._displayid2name[next_display_id]=name
+        next_display_id += 1
         return tab
 
     '''
@@ -84,11 +86,12 @@ class Visualizer():
     返回：创建的向量对象。
     '''
     def createVector(self, data, cell_size=50, name=None):
+        global next_display_id
         vec = vector.Vector(data, self._animate_delay, cell_size)
-        self._element2display[vec] = self._next_display_id
+        self._element2display[vec] = next_display_id
         if name is not None:
-            self._displayid2name[self._next_display_id]=name
-        self._next_display_id += 1
+            self._displayid2name[next_display_id]=name
+        next_display_id += 1
         return vec
 
     '''
@@ -99,11 +102,12 @@ class Visualizer():
     返回：创建的拓扑图可视化对象。
     '''
     def createGraph(self, directed=True, horizontal=False, data=None, name=None):
+        global next_display_id
         gra = svg_graph.SvgGraph(data, directed, self._animate_delay, horizontal)
-        self._element2display[gra] = self._next_display_id
+        self._element2display[gra] = next_display_id
         if name is not None:
-            self._displayid2name[self._next_display_id]=name
-        self._next_display_id += 1
+            self._displayid2name[next_display_id]=name
+        next_display_id += 1
         return gra
     
     '''

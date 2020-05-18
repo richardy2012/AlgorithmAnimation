@@ -8,13 +8,11 @@ import json
 class GraphNode():
     '''
     val:... 节点上显示的标签。
-    neighbors:list(GraphNode) 该节点所有的邻居节点。
-    edge_infos:list(...) 该节点与邻居节点所构成边上的信息值。
     '''
-    def __init__(self, val, neighbors=list(), edge_infos=None):
+    def __init__(self, val):
         self.val = val
-        self.neighbors = neighbors
-        self.edge_infos = edge_infos
+        self.neighbors = list()
+        self.weights = list()
     
     '''
     返回：所有邻居节点和邻居边的权重值。
@@ -22,10 +20,7 @@ class GraphNode():
     def _neighbors_(self):
         res = list()
         for i in range(len(self.neighbors)):
-            if self.edge_infos is None:
-                res.append((self.neighbors[i], None))
-            else:
-                res.append((self.neighbors[i], self.edge_infos[i]))
+            res.append((self.neighbors[i], self.weights[i]))
         return res
 
 '''
@@ -80,7 +75,7 @@ class GraphTrace():
     返回：跟踪器所跟踪的图节点中邻居的数量。
     '''
     def __len__(self):
-        return len(self.neighbors)
+        return len(self._node.neighbors)
     
     '''
     name:str 访问跟踪器的属性，以及跟踪器所绑定拓扑图节点的val属性。
@@ -108,14 +103,14 @@ class GraphTrace():
     '''
     def __getitem__(self, index):
         node = super().__getattribute__('_node')
-        if node.edge_infos is None:
-            return node.neighbors[index]
+        if node.weights[index] is not None:
+            return (node.neighbors[index], node.weights[index])
         else:
-            return (node.neighbors[index], self.edge_infos[index])
+            return node.neighbors[index]
     
     '''
     index:int 要修改的子节点的索引，如果index大于子节点列表长度，则添加子节点。
-    value:GraphNode[edge_info] 新的拓扑图节点值[对应边上的权重值]。
+    value:GraphNode[weight] 新的拓扑图节点值[对应边上的权重值]（value中node为None则代表删除节点）。
     '''
     def __setitem__(self, index, value):
         if index < 0:
@@ -127,21 +122,46 @@ class GraphTrace():
         else:
             child_node = value
         if index >= len(node.neighbors):
-            self._graph.add_node(child_node)
-            node.neighbors.append(child_node)
+            if child_node is not None:
+                self._graph.add_node(child_node)
+                node.neighbors.append(child_node)
+                node.weights.append(child_edge)
         else:
-            self._graph.add_node(child_node)
-            node.neighbors[index] = child_node
-        if node.edge_infos is not None:
-            if index >= len(node.edge_infos):
-                node.edge_infos.append(child_edge)
+            if child_node is not None:
+                self._graph.add_node(child_node)
+                node.neighbors[index] = child_node
+                node.weights[index] = child_edge
             else:
-                node.edge_infos[index] = child_edge
+                node.neighbors.pop(index)
+                node.weights.pop(index)
 
 '''
-graph_str:str 表示拓扑图邻接表的json字符串。
+node_str:json字符串 表示拓扑图中的节点信息和节点上的标签（eg:[[0, 1], [1, 2], [2, 3]]）。
+edge_str:json字符串 表示拓扑图中的所有边（eg:[[0, 1], [1, 2], [2, 0]]）。
 directed:bool 该拓扑图是否为有向图。
-返回：拓扑图中根结点，如果是离散的图则返回节点集合。
+返回：dict 拓扑图中所有节点的集合（key:节点id, value:节点对象）。
 '''
-def parseGraph(graph_str, directed=True)
-    pass
+def parseGraph(node_str, edge_str, directed=True):
+    nodes = json.loads(node_str)
+    edges = json.loads(edge_str)
+    res = dict()
+    for node in nodes:
+        nid, val = None, None
+        if type(node) == list:
+            nid, val = node
+        else:
+            nid = node
+        res[nid] = GraphNode(val)
+    for edge in edges:
+        n1id, n2id, weight = None, None, None
+        if len(edge) == 3:
+            n1id, n2id, weight = edge
+        elif len(edge) == 2:
+            n1id, n2id = edge
+        if n1id in res.keys() and n2id in res.keys():
+            res[n1id].neighbors.append(res[n2id])
+            res[n1id].weights.append(weight)
+            if directed == False:
+                res[n2id].neighbors.append(res[n1id])
+                res[n2id].weights.append(weight)
+    return res
