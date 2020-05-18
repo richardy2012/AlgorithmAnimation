@@ -11,6 +11,7 @@ import tree
 import link_list
 import svg_graph
 import svg_table
+import utility
 
 class _NoDisplay():
     def _repr_svg_(self):
@@ -47,12 +48,14 @@ class Visualizer():
             did = self._element2display[elem()]
             if did not in self._displayed:
                 if did in self._displayid2name:
-                    svg_title = svg_table.SvgTable(200, 20)
-                    svg_title.add_text_element((3, 16), '{}:'.format(self._displayid2name[did]), font_size=16, fill=(0,0,0))
+                    svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
                     display.display(svg_title, display_id='algviz_{}'.format(did))
                 display.display(elem(), display_id='algviz{}'.format(did))
                 self._displayed.add(did)
             else:
+                if did in self._displayid2name:
+                    svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
+                    display.update_display(svg_title, display_id='algviz_{}'.format(did))
                 display.update_display(elem(), display_id='algviz{}'.format(did))
         temp_displayed = list(self._displayed)
         for did in temp_displayed:
@@ -114,10 +117,10 @@ class Visualizer():
     gra:SvgGraph 与跟踪器绑定的拓扑图显示对象。
     hold:bool 是否需要在链表中显示trace经过的路径。
     node:ForwardListNode 为跟踪器初始化的链表节点。
-    返回：创建的单向列表跟踪器对象。
+    name:str 跟踪器名称。
     '''
-    def createForwardListTrace(self, gra, hold=False, node=None):
-        pick_color = self._pickTraceColor_(gra)
+    def createForwardListTrace(self, gra, hold=False, node=None, name=None):
+        pick_color = self._pickTraceColor_(gra, name)
         if pick_color is None:
             raise Exception('Too many traces in graph!')
         else:
@@ -127,10 +130,10 @@ class Visualizer():
     gra:SvgGraph 与跟踪器绑定的拓扑图显示对象。
     hold:bool 是否需要在二叉树中显示trace经过的路径。
     node:BinaryTreeNode 为跟踪器初始化的二叉树节点。
-    返回：创建的二叉树跟踪器对象。
+    name:str 跟踪器名称。
     '''
-    def createBinaryTreeTrace(self, gra, hold=False, node=None):
-        pick_color = self._pickTraceColor_(gra)
+    def createBinaryTreeTrace(self, gra, hold=False, node=None, name=None):
+        pick_color = self._pickTraceColor_(gra, name)
         if pick_color is None:
             raise Exception('Too many traces in graph!')
         else:
@@ -140,10 +143,10 @@ class Visualizer():
     gra:SvgGraph 与跟踪器绑定的拓扑图显示对象。
     hold:bool 是否需要在拓扑图中显示trace经过的路径。
     node:GraphNode 为跟踪器初始化的拓扑图节点。
-    返回：创建的拓扑图跟踪器对象。
+    name:str 跟踪器名称。
     '''
-    def createGraphTrace(self, gra, hold=False, node=None):
-        pick_color = self._pickTraceColor_(gra)
+    def createGraphTrace(self, gra, hold=False, node=None, name=None):
+        pick_color = self._pickTraceColor_(gra, name)
         if pick_color is None:
             raise Exception('Too many traces in graph!')
         else:
@@ -153,10 +156,10 @@ class Visualizer():
     table:Table trace将要绑定的table对象。
     hold:bool 是否需要在表格中显示trace经过的路径。
     r,c:int 初始位置的行列坐标。
-    返回：TableTrace 跟踪器。
+    name:str 跟踪器名称。
     '''
-    def createTableTrace(self, tab, hold=False, r=0, c=0):
-        pick_color = self._pickTraceColor_(tab)
+    def createTableTrace(self, tab, hold=False, r=0, c=0, name=None):
+        pick_color = self._pickTraceColor_(tab, name)
         if pick_color is None:
             raise Exception('Too many traces in table!')
         else:
@@ -166,9 +169,10 @@ class Visualizer():
     vec:Vector trace将要绑定的vector对象。
     hold:bool 是否需要在向量中显示trace经过的路径。
     i:int 跟踪器初始索引位置。
+    name:str 跟踪器名称。
     '''
-    def createVectorTrace(self, vec, hold=False, i=0):
-        pick_color = self._pickTraceColor_(vec)
+    def createVectorTrace(self, vec, hold=False, i=0, name=None):
+        pick_color = self._pickTraceColor_(vec, name)
         if pick_color is None:
             raise Exception('Too many traces in vector!')
         else:
@@ -176,15 +180,33 @@ class Visualizer():
 
     '''
     show_obj:... 可视化对象（该函数自动为可视化对象的跟踪器分配颜色）。
+    name:str 跟踪器名称。
     '''
-    def _pickTraceColor_(self, show_obj):
-        if len(show_obj._trace_color) >= len(self._trace_color_list):
+    def _pickTraceColor_(self, show_obj, name):
+        if len(show_obj._trace_info) >= len(self._trace_color_list):
             return None
         else:
             pick_color = None
             for i in range(len(self._trace_color_list)):
                 pick_color = self._trace_color_list[i]
-                if pick_color not in show_obj._trace_color:
+                if pick_color not in show_obj._trace_info.keys():
                     break
-            show_obj._trace_color.add(pick_color)
+            show_obj._trace_info[pick_color] = name
             return pick_color
+
+    '''
+    name:str 表示SVG名称的字符串。
+    trace_info:dict() 该SVG对象中的跟踪器信息。
+    '''
+    def _createSvgTitle_(self, name, trace_info):
+        width, margin = 40, 4
+        svg_title = svg_table.SvgTable(600, 24)
+        svg_title.add_text_element((margin, 16), '{}:'.format(name), font_size=16, fill=(0,0,0))
+        nb_trace = 0
+        offset_x = utility.text_char_num(name)*8 + margin*2
+        for color in trace_info.keys():
+            if trace_info[color] is not None:
+                x_pos = offset_x + nb_trace*(width + margin)
+                svg_title.add_rect_element((x_pos, 2, width, 20), text=trace_info[color], fill=color)
+                nb_trace += 1
+        return svg_title

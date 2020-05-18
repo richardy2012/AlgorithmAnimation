@@ -163,10 +163,19 @@ text:str 文本内容（中英文混合都支持）。
 返回值：float 理想字体大小。
 '''
 def text_font_size(text_width, text):
-    display_len = 0
+    display_len = text_char_num(text)
+    return min(16, text_width*1.5/display_len)
+
+'''
+功能：统计文本中字符个数。
+text:str 文本内容（中英文混合都支持）。
+'''
+def text_char_num(text):
+    count = 0
     for ch in text:
         if '\u4e00' <= ch <= '\u9fff':
-            display_len += 2
+            count += 2
         else:
-            display_len += 1
-    return min(16, text_width*1.5/display_len)
+            count += 1
+    return count
+    

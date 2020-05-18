@@ -28,7 +28,7 @@ class SvgGraph():
         self._node_move = set()         # 记录在动画效果中移动的节点集合。
         self._frame_trace_old = list()  # 缓存上一帧需要清除的节点/边相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()      # 记录下一帧待刷新的节点/边相关信息(节点索引，轨迹颜色值，是否持久化)。
-        self._trace_color = set()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
+        self._trace_info = dict()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
         self._svg = None                # 将要显示的拓扑图的svg对象。
         self._node_idmap = None         # 实际节点和graphviz中对应节点的id值。
         self._edge_idmap = None         # 实际节点对和graphviz中对应边的id值。
@@ -103,7 +103,7 @@ class SvgGraph():
                     edge = util.find_tag_by_id(self._svg, 'g', edge_id)
                     self._update_edge_color_(edge, self._edge_tcs[k].color())
         self._trace_last_visit.pop(color)
-        self._trace_color.remove(color)
+        self._trace_info.pop(color)
     
     '''
     功能：更新拓扑图中节点的标签值。

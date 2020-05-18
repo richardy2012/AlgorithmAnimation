@@ -47,8 +47,8 @@ class SvgTable():
         r.setAttribute('width', '{:.2f}'.format(rect[2]))
         r.setAttribute('height', '{:.2f}'.format(rect[3]))
         if angle is True:
-            r.setAttribute('rx', '{:.2f}'.format(rect[2]*0.1))
-            r.setAttribute('ry', '{:.2f}'.format(rect[3]*0.1))
+            r.setAttribute('rx', '{:.2f}'.format(min(rect[2], rect[3])*0.1))
+            r.setAttribute('ry', '{:.2f}'.format(min(rect[2], rect[3])*0.1))
         r.setAttribute('fill', util.rgbcolor2str(fill))
         r.setAttribute('stroke', util.rgbcolor2str(stroke))
         g.appendChild(r)

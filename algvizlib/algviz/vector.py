@@ -40,7 +40,7 @@ class Vector():
         self._rect_appear = list()      # 记录下一帧动画中出现的矩形索引。
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
         self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
-        self._trace_color = set()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
+        self._trace_info = dict()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
         self._label_font_size = int(min(12, cell_size*0.5))
         self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, cell_size+2*self._cell_margin+self._label_font_size)
         for i in range(len(data)):
@@ -189,4 +189,4 @@ class Vector():
             for rid in self._index2rect.values():
                 if self._cell_tcs[rid].remove(trace._color):
                     self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
-        self._trace_color.remove(trace._color)
+        self._trace_info.pop(trace._color)

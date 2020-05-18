@@ -36,7 +36,7 @@ class Table():
         self._cell_tcs = dict()           # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
         self._frame_trace_old = list()    # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()        # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
-        self._trace_color = set()         # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
+        self._trace_info = dict()         # 记录现存的所有跟踪器的颜色和名称的映射关系。
         if data is None:
             self._data = [[None for _ in range(col)] for _ in range(row)]
         else:
@@ -104,4 +104,4 @@ class Table():
             for gid in range(self._row*self._col):
                 if self._cell_tcs[gid].remove(trace._color):
                     self._svg.update_rect_element(gid, fill=self._cell_tcs[gid].color())
-        self._trace_color.remove(trace._color)
+        self._trace_info.pop(trace._color)
