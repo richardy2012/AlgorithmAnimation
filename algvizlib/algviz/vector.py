@@ -24,13 +24,15 @@ class Vector():
     data:list(...) 初始化数据。
     delay:float 动画延时。
     cell_size:float 单元格宽度。
+    bar:float 如果bar值小于零则忽略，否则以柱状图形式显示数据。
     '''
-    def __init__(self, data, delay, cell_size):
+    def __init__(self, data, delay, cell_size, bar=-1):
         if not isinstance(data, list):
             return
         self._data = data               # 保存数组中的数据。
         self._delay = delay             # 动画延迟时间。
         self._cell_size = cell_size     # 单元格的宽度。
+        self._bar = bar                 # 是否以柱状图形式显示数值高度（也包含SVG的高度信息）。
         self._cell_margin = 3           # 矩形框之间的边距。
         self._cell_tcs = dict()         # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
         self._frame_trace_old = list()  # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
@@ -42,14 +44,19 @@ class Vector():
         self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
         self._trace_info = dict()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
         self._label_font_size = int(min(12, cell_size*0.5))
-        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, cell_size+2*self._cell_margin+self._label_font_size)
+        svg_height = cell_size + 2*self._cell_margin + self._label_font_size
+        if self._bar > 0:
+            svg_height = self._bar
+        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, svg_height)
         for i in range(len(data)):
             rect = (cell_size*i+self._cell_margin*(i+1), self._cell_margin, cell_size, cell_size)
             rid = self._svg.add_rect_element(rect, text=data[i])
             self._cell_tcs[rid] = util.TraceColorStack()
             self._index2rect[i] = rid
+        if self._bar > 0:
+            self._update_bar_height_()
         for i in range(len(data)):
-            pos = (cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*len(str(i))*0.25, self._cell_margin*2+cell_size+self._label_font_size)
+            pos = (cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*len(str(i))*0.25, svg_height)
             tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
             self._index2text.append(tid)
     
@@ -139,7 +146,10 @@ class Vector():
     def _repr_svg_(self):
         # 更新矩形跟踪器的颜色。
         nb_elem = len(self._data) + len(self._rect_disappear)
-        self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin, self._cell_size+2*self._cell_margin+self._label_font_size)
+        svg_height = self._cell_size + 2*self._cell_margin+self._label_font_size
+        if self._bar > 0:
+            svg_height = self._bar
+        self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin, svg_height)
         for (rid, color) in self._frame_trace_old:
             self._cell_tcs[rid].remove(color)
             self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
@@ -150,6 +160,8 @@ class Vector():
                 self._frame_trace_old.append((rid, color))
         self._frame_trace.clear()
         # 添加矩形移动的动画。
+        if self._bar > 0:
+            self._update_bar_height_()
         for rid in self._rect_move.keys():
             if self._rect_move[rid] == 0:
                 continue
@@ -160,18 +172,20 @@ class Vector():
                 self._index2text.pop()
         elif len(self._index2text) < len(self._data):
             for i in range(len(self._index2text), len(self._data)):
-                pos = (self._cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*0.25*len(str(i)), self._cell_margin*2+self._cell_size+self._label_font_size)
+                pos = (self._cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*0.25*len(str(i)), svg_height)
                 tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
                 self._index2text.append(tid)
+        self._rect_move.clear()
         res = self._svg._repr_svg_()
         # 清除动画效果，更新SVG内容，为下一帧做准备。
         self._svg.clear_animates()
-        for rid in self._rect_move.keys():
-            if self._rect_move[rid] == 0:
-                continue
-            rect = (self._rect_move[rid]*(self._cell_size+self._cell_margin), 0, self._cell_size, self._cell_size)
-            self._svg.update_rect_element(rid, rect=rect)
-        self._rect_move.clear()
+        if self._bar > 0:
+            self._update_bar_height_()
+        else:
+            for i in range(len(self._data)):
+                rect = (self._cell_size*i+self._cell_margin*(i+1), self._cell_margin, self._cell_size, self._cell_size)
+                rid = self._index2rect[i]
+                self._svg.update_rect_element(rid, rect=rect)
         for rid in self._rect_disappear:
             self._svg.delete_element(rid)
             self._cell_tcs.pop(rid)
@@ -180,6 +194,38 @@ class Vector():
             self._svg.update_rect_element(rid, opacity=True)
         self._rect_appear.clear()
         return res
+    
+    '''
+    功能：更新柱状图中每个柱子的高度。
+    '''
+    def _update_bar_height_(self):
+        # 根据数据范围调整比率和基线位置。
+        mmax_data, max_data = 0, 0
+        for num in self._data:
+            num = float(num)
+            if num < 0:
+                mmax_data = min(mmax_data, num)
+            else:
+                max_data = max(max_data, num)
+        ratio = (self._bar - 2*self._cell_margin - self._label_font_size)/(max_data-mmax_data)
+        baseline = max_data*ratio + self._cell_margin
+        # 更新矩形的位置坐标。
+        for i in range(len(self._data)):
+            num = float(self._data[i])
+            rid = self._index2rect[i]
+            x = self._cell_size*i + self._cell_margin*(i+1)
+            if rid in self._rect_move.keys():
+                x -= self._rect_move[rid] * (self._cell_size+self._cell_margin)
+            height = ratio*num
+            if num < 0:
+                y = baseline + height
+            else:
+                y = baseline - height
+            if num - int(num) > 0.001:
+                num = '{:.2f}'.format(num)
+            else:
+                num = '{:.0f}'.format(num)
+            self._svg.update_rect_element(rid, rect=(x, y, self._cell_size, height), text=num)
     
     '''
     trace:TableTrace 将要被删除的数组跟踪器对象。

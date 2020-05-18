@@ -91,7 +91,7 @@ class SvgTable():
     
     '''
     gid:int 要更新的矩形元素的ID值。
-    rect:(dx, dy, w, h) 矩形移动的距离和矩形尺寸。
+    rect:(x, y, w, h) 矩形移动的距离和矩形尺寸。
     text:str 矩形内部文本字符串。
     fill:(R,G,B) 矩形填充颜色。
     stroke:(R,G,B) 矩形边框颜色。
@@ -110,18 +110,16 @@ class SvgTable():
             if len(t):
                 t[0].setAttribute('fill', util.auto_text_color(fill))
         if rect is not None:
-            rx = float(r.getAttribute('x'))
-            ry = float(r.getAttribute('y'))
-            r.setAttribute('x', '{:.2f}'.format(rx + rect[0]))
-            r.setAttribute('y', '{:.2f}'.format(ry + rect[1]))
+            r.setAttribute('x', '{:.2f}'.format(rect[0]))
+            r.setAttribute('y', '{:.2f}'.format(rect[1]))
             r.setAttribute('width', '{:.2f}'.format(rect[2]))
             r.setAttribute('height', '{:.2f}'.format(rect[3]))
             if r.getAttribute('rx') != '':
-                r.setAttribute('rx', '{:.2f}'.format(rect[2]*0.1))
-                r.setAttribute('ry', '{:.2f}'.format(rect[3]*0.1))
+                r.setAttribute('rx', '{:.2f}'.format(min(rect[2],rect[3])*0.1))
+                r.setAttribute('ry', '{:.2f}'.format(min(rect[2],rect[3])*0.1))
             if len(t):
-                t[0].setAttribute('x', '{:.2f}'.format(rx+rect[0]+rect[2]*0.5))
-                t[0].setAttribute('y', '{:.2f}'.format(ry+rect[1]+rect[3]*0.5))
+                t[0].setAttribute('x', '{:.2f}'.format(rect[0]+rect[2]*0.5))
+                t[0].setAttribute('y', '{:.2f}'.format(rect[1]+rect[3]*0.5))
                 new_font = util.text_font_size(rect[2], '{}'.format(t[0].firstChild.nodeValue))
                 t[0].setAttribute('font-size', '{:.2f}'.format(new_font))
         if text is not None:

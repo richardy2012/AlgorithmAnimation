@@ -86,11 +86,12 @@ class Visualizer():
     data:list(...) 向量中初始化的数据。
     cell_size:float 向量中单元格的长宽尺寸。
     name:str 表格的名字。
+    bar:float 如果bar值小于零则忽略，否则以柱状图形式显示数据。
     返回：创建的向量对象。
     '''
-    def createVector(self, data, cell_size=50, name=None):
+    def createVector(self, data, cell_size=50, name=None, bar=-1):
         global next_display_id
-        vec = vector.Vector(data, self._animate_delay, cell_size)
+        vec = vector.Vector(data, self._animate_delay, cell_size, bar)
         self._element2display[vec] = next_display_id
         if name is not None:
             self._displayid2name[next_display_id]=name
