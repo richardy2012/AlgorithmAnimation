@@ -28,9 +28,11 @@ class Visualizer():
         
     '''
     delay:float 延时时间长度。
+    waitkey:bool 是否等待按键输入后继续代码。
     '''
-    def __init__(self, delay = 3.0):
+    def __init__(self, delay=3.0, waitkey=False):
         self._animate_delay = delay
+        self._waitkey = waitkey
         self._trace_color_list = [
             (211, 211, 211), # LightGray
             (245, 222, 179), # Wheat
@@ -49,27 +51,38 @@ class Visualizer():
     功能：刷新所有已创建的显示对象。
     '''
     def refresh(self):
-        for elem in self._element2display.keyrefs():
-            did = self._element2display[elem()]
-            if did not in self._displayed:
-                if did in self._displayid2name:
-                    svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
-                    display.display(svg_title, display_id='algviz_{}'.format(did))
-                display.display(elem(), display_id='algviz{}'.format(did))
-                self._displayed.add(did)
+        if self._waitkey == False:
+            for elem in self._element2display.keyrefs():
+                did = self._element2display[elem()]
+                if did not in self._displayed:
+                    if did in self._displayid2name:
+                        svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
+                        display.display(svg_title, display_id='algviz_{}'.format(did))
+                    display.display(elem(), display_id='algviz{}'.format(did))
+                    self._displayed.add(did)
             else:
                 if did in self._displayid2name:
                     svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
                     display.update_display(svg_title, display_id='algviz_{}'.format(did))
                 display.update_display(elem(), display_id='algviz{}'.format(did))
-        temp_displayed = list(self._displayed)
-        for did in temp_displayed:
-            if did not in self._element2display.values():
+            temp_displayed = list(self._displayed)
+            for did in temp_displayed:
+                if did not in self._element2display.values():
+                    if did in self._displayid2name:
+                        display.update_display(_NoDisplay(), display_id='algviz_{}'.format(did))
+                    display.update_display(_NoDisplay(), display_id='algviz{}'.format(did))
+                    self._displayed.remove(did)
+            time.sleep(self._animate_delay)
+        else:
+            display.clear_output(wait=True)
+            for elem in self._element2display.keyrefs():
+                did = self._element2display[elem()]
                 if did in self._displayid2name:
-                    display.update_display(_NoDisplay(), display_id='algviz_{}'.format(did))
-                display.update_display(_NoDisplay(), display_id='algviz{}'.format(did))
-                self._displayed.remove(did)
-        time.sleep(self._animate_delay)
+                    svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
+                    display.display(svg_title, display_id='algviz_{}'.format(did))
+                display.display(elem(), display_id='algviz{}'.format(did))
+                self._displayed.add(did)
+            input('任意键继续：')
         
     '''
     row:int 表格行数；col:int 表格列数。
