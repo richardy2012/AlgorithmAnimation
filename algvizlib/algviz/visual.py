@@ -31,7 +31,9 @@ class Visualizer():
     waitkey:bool 是否等待按键输入后继续代码。
     '''
     def __init__(self, delay=3.0, waitkey=False):
-        self._animate_delay = delay
+        self._animate_delay = 3.0
+        if delay > 0:    #对输入数据的范围进行检测。
+            self._animate_delay = delay
         self._waitkey = waitkey
         self._trace_color_list = [
             (211, 211, 211), # LightGray
