@@ -1,3 +1,7 @@
+# algvizlib接口介绍
+
++ TODO描述对外接口含义。
+
 # algvizlib设计原理
 
 ## 文件目录
