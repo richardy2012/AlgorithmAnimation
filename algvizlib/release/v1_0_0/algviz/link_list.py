@@ -23,6 +23,9 @@ class ForwardListNode():
     '''
     def _neighbors_(self):
         return [(self.next, None)]
+    
+    def __str__(self):
+        return str(self.val)
         
 '''
 单向链表跟踪器定义。
@@ -55,6 +58,8 @@ class ForwardListTrace():
     def __call__(self, node):
         if type(node) == ForwardListTrace:
             node = node._node
+        elif type(node) == ForwardListNode:
+            node = node
         super().__setattr__('_node', node)
         self._graph.add_node(node)
         self._graph.trace_visit(node, self._color, self._hold)

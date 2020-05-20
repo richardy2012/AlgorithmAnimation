@@ -52,7 +52,7 @@ class Table():
         for r in range(self._row):
             for c in range(self._col):
                 rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
-                self._svg.add_rect_element(rect, self._data[r][c], angle=False)
+                self._svg.add_rect_element(rect, str(self._data[r][c]), angle=False)
                 self._cell_tcs[r*col+c] = utility.TraceColorStack()
         for r in range(row):
             pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
@@ -83,7 +83,7 @@ class Table():
         gid = trace.r*self._col + trace.c
         self._cell_tcs[gid].add(trace._color)
         self._frame_trace.append((gid, trace._color, trace._hold))
-        self._svg.update_rect_element(gid, text=val)
+        self._svg.update_rect_element(gid, text=str(val))
         self._data[trace.r][trace.c] = val
     
     '''

@@ -24,6 +24,9 @@ class BinaryTreeNode:
     '''
     def _neighbors_(self):
         return ((self.left, None), (self.right, None))
+    
+    def __str__(self):
+        return str(self.val)
 
 '''
 二叉树跟踪器的定义。
@@ -56,6 +59,8 @@ class BinaryTreeTrace:
     def __call__(self, node):
         if type(node) == BinaryTreeTrace:
             node = node._node
+        elif type(node) == BinaryTreeNode:
+            node = node
         super().__setattr__('_node', node)
         self._graph.add_node(node)
         self._graph.trace_visit(node, self._color, self._hold)

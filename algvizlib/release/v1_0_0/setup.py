@@ -21,7 +21,7 @@ setup(
         'graphviz>=0.13.2',
     ],
     classifiers=[
-        "Development Status :: 20200519_alpha",
+        "Development Status :: 20200520_alpha",
         "Topic :: BasicDataAnimation",
         "License :: OSI Approved :: GNU General Public License (GPL)",
     ],

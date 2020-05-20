@@ -5,7 +5,8 @@
 # algvizlib设计原理
 
 ## 文件目录
-+ algviz/ 绘图相关代码：
+
++ **algviz/ 绘图相关代码**：
     + `visual.py` 定义基本数据结构（拓扑图、表格）的交互接口。
     + `graph.py` 各种拓扑图节点和跟踪器定义。
     + `tree.py` 各种树节点和跟踪器定义。
@@ -16,7 +17,7 @@
     + `svg_graph.py` 解析拓扑图的svg对象并添加动画效果。
     + `utility.py` 定义一些公共函数。
     + `__init__.py` 表示该文件是一个包。
-+ test/ 测试相关代码：
++ **test/ 测试相关代码**：
     + `test_svg_table.ipynb` 测试`svg_table.py`中各接口功能是否正常。
     + `test_table.ipynb` 测试`table.py`中各接口功能是否正常。
     + `test_vector.ipynb` 测试`vector.py`中各接口功能是否正常。
