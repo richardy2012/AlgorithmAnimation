@@ -7,7 +7,7 @@
 
 import xml.dom.minidom as xmldom
 
-import utility as util
+from . import utility as util
 
 class SvgTable():
     '''

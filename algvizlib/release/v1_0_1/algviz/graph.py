@@ -27,6 +27,9 @@ class GraphNode():
         for i in range(len(self.neighbors)):
             res.append((self.neighbors[i], self.weights[i]))
         return res
+    
+    def __str__(self):
+        return str(self.val)
 
 '''
 拓扑图节点跟踪器的定义。
@@ -59,6 +62,8 @@ class GraphTrace():
     def __call__(self, node):
         if type(node) == GraphTrace:
             node = node._node
+        elif type(node) == GraphNode:
+            node = node
         super().__setattr__('_node', node)
         self._graph.add_node(node)
         self._graph.trace_visit(node, self._color, self._hold)
@@ -132,13 +137,9 @@ class GraphTrace():
                 node.neighbors.append(child_node)
                 node.weights.append(child_edge)
         else:
-            if child_node is not None:
-                self._graph.add_node(child_node)
-                node.neighbors[index] = child_node
-                node.weights[index] = child_edge
-            else:
-                node.neighbors.pop(index)
-                node.weights.pop(index)
+            self._graph.add_node(child_node)
+            node.neighbors[index] = child_node
+            node.weights[index] = child_edge
 
 '''
 node_str:json字符串 表示拓扑图中的节点信息和节点上的标签（eg:[[0, 1], [1, 2], [2, 3]]）。

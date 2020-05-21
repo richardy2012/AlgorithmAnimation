@@ -1,5 +1,10 @@
-- [x] F200520 优化`graph.py`中的`parseGraph`接口，将`node_str`参数默认设为None，如果不传入该参数，则自动根据边的编号为拓扑图的顶点设置标签值。
-- [x] F200520 每次为跟踪器随机分配一种颜色。
-- [x] B200520 `visual.py`中，显示对象名称的文字长度获取有误，容易导致trace标签和文字重合。当未定义对象名称时，其所属的trace的名称也应该显示。
-- [x] B200520 `graph.py:GraphTrace:__call__`中node为普通节点时未赋值。
-- [x] F200520 `vector.py`中添加append()接口，pop支持默认弹出最后一个元素。
+# 版本V1_0_1
+
+- [x] feature.200520 优化`graph.py::parseGraph`接口，~~~将`node_str`参数默认设为None，如果不传入该参数，则自动根据边的编号为拓扑图的顶点设置标签值。~~~（按照原来的接口设计。）
+- [x] feature.200520 ✔️每次为跟踪器随机分配一种颜色。
+- [x] bug.200520 `visual.py`中，✔️显示对象名称的文字长度获取有误，容易导致trace标签和文字重合。❌~~~当未定义对象名称时，其所属的trace的名称也应该显示。~~~
+- [x] bug.200520 ✔️`graph.py::GraphTrace::__call__`中node为普通节点时未赋值。
+- [x] feature.200520 ✔️`vector.py`中添加append()接口，pop支持默认弹出最后一个元素（此外还优化了insert和pop接口）。
+- [x] feature.200521 ✔️将算法延时时长设定放置在`Visualizer::refresh`的接口中，需要重新考虑等待输入功能。
+- [x] bug.200521 ✔️`Vector`和`Table`中的data数据没有深拷贝，会导致不同对象之间的数据互相干扰。
+- [x] bug.200521 ✔️`Vector::insert`中可能出现除0错误，需要单独考虑（此外，还添加了`clear`接口）。

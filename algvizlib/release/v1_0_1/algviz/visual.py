@@ -10,14 +10,14 @@ import time
 import random
 from IPython import display
 
-import table
-import vector
-import graph
-import tree
-import link_list
-import svg_graph
-import svg_table
-import utility
+from . import table
+from . import vector
+from . import graph
+from . import tree
+from . import link_list
+from . import svg_graph
+from . import svg_table
+from . import utility
 
 class _NoDisplay():
     def _repr_svg_(self):

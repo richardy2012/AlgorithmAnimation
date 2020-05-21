@@ -55,7 +55,7 @@ class Vector():
         self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, svg_height)
         for i in range(len(data)):
             rect = (cell_size*i+self._cell_margin*(i+1), self._cell_margin, cell_size, cell_size)
-            rid = self._svg.add_rect_element(rect, text=str(data[i]))
+            rid = self._svg.add_rect_element(rect, text=data[i])
             self._cell_tcs[rid] = util.TraceColorStack()
             self._index2rect[i] = rid
         if self._bar > 0:
@@ -91,55 +91,44 @@ class Vector():
         rid = self._index2rect[trace.i]
         self._cell_tcs[rid].add(trace._color)
         self._frame_trace.append((rid, trace._color, trace._hold))
-        self._svg.update_rect_element(rid, text=str(val))
+        self._svg.update_rect_element(rid, text=val)
         self._data[trace.i] = val
     
     '''
-    index:int 要插入的位置，在其前方插入元素。
+    trace:VectorTrace 数组跟踪器对象，在其前方插入元素。
     val:... 要插入的值。
     '''
-    def insert(self, index, val):
-        if index < 0 or index >= len(self._data):
-            index %= len(self._data)
+    def insert(self, trace, val):
+        if trace.i < 0:
+            raise Exception('Vector trace out of range!')
+        elif trace.i >= len(self._data):
+            trace.i = len(self._data)
         # 向svg中添加新的矩形节点和动画。
-        rect = (self._cell_size*index+self._cell_margin*(index+1), self._cell_margin, self._cell_size, self._cell_size)
-        rid = self._svg.add_rect_element(rect, text=str(val))
+        rect = (self._cell_size*trace.i+self._cell_margin*(trace.i+1), self._cell_margin, self._cell_size, self._cell_size)
+        rid = self._svg.add_rect_element(rect, text=val)
         self._svg.add_animate_appear(rid, (0, self._delay))
         # 记录插入位置以后的矩形的移动。
-        for i in range(len(self._data), index, -1):
+        for i in range(len(self._data), trace.i, -1):
             rrid = self._index2rect[i-1]
             self._index2rect[i] = rrid
             if rrid in self._rect_move:
                 self._rect_move[rrid] += 1
             else:
                 self._rect_move[rrid] = 1
-        self._index2rect[index] = rid
+        self._index2rect[trace.i] = rid
         self._cell_tcs[rid] = util.TraceColorStack()
         self._rect_appear.append(rid)
-        self._data.insert(index, val)
+        self._data.insert(trace.i, val)
     
     '''
-    val:... 要添加的值。
+    trace:VectorTrace 要删除的元素的位置。
     '''
-    def append(self, val):
-        index = len(self._data)
-        rect = (self._cell_size*index+self._cell_margin*(index+1), self._cell_margin, self._cell_size, self._cell_size)
-        rid = self._svg.add_rect_element(rect, text=str(val))
-        self._svg.add_animate_appear(rid, (0, self._delay))
-        self._index2rect[index] = rid
-        self._cell_tcs[rid] = util.TraceColorStack()
-        self._rect_appear.append(rid)
-        self._data.append(val)
-    
-    '''
-    index:int 要删除的元素的位置。
-    '''
-    def pop(self, index = -1):
-        if index < 0 or index >= len(self._data):
-            index %= len(self._data)
-        rid = self._index2rect[index]
+    def pop(self, trace):
+        if trace.i < 0 or trace.i >= len(self._data):
+            raise Exception('Vector trace out of range!')
+        rid = self._index2rect[trace.i]
         self._svg.add_animate_appear(rid, (0, self._delay), appear=False)
-        for i in range(index, len(self._data)-1):
+        for i in range(trace.i, len(self._data)-1):
             rrid = self._index2rect[i+1]
             self._index2rect[i] = rrid
             if rrid in self._rect_move:
@@ -148,7 +137,7 @@ class Vector():
                 self._rect_move[rrid] = -1
         self._index2rect.pop(len(self._data)-1)
         self._rect_disappear.append(rid)
-        return self._data.pop(index)
+        self._data.pop(trace.i)
     
     '''
     返回值：int 数组长度。

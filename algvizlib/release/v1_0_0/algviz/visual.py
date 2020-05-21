@@ -7,7 +7,6 @@
 
 import weakref
 import time
-import random
 from IPython import display
 
 from . import table
@@ -29,17 +28,13 @@ class Visualizer():
         
     '''
     delay:float 延时时间长度。
-    waitkey:bool 是否等待按键输入后继续代码。
     '''
-    def __init__(self, delay=3.0, waitkey=False):
-        self._animate_delay = 3.0
-        if delay > 0:    #对输入数据的范围进行检测。
-            self._animate_delay = delay
-        self._waitkey = waitkey
+    def __init__(self, delay = 3.0):
+        self._animate_delay = delay
         self._trace_color_list = [
+            (211, 211, 211), # LightGray
             (245, 222, 179), # Wheat
             (255, 182, 193), # LightPink
-            (211, 211, 211), # LightGray
             (202, 255, 112), # DarkOliveGreen
             (221, 160, 221), # Plum
             (176, 226, 255), # LightSkyBlue
@@ -54,38 +49,27 @@ class Visualizer():
     功能：刷新所有已创建的显示对象。
     '''
     def refresh(self):
-        if self._waitkey == False:
-            for elem in self._element2display.keyrefs():
-                did = self._element2display[elem()]
-                if did not in self._displayed:
-                    if did in self._displayid2name:
-                        svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
-                        display.display(svg_title, display_id='algviz_{}'.format(did))
-                    display.display(elem(), display_id='algviz{}'.format(did))
-                    self._displayed.add(did)
-                else:
-                    if did in self._displayid2name:
-                        svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
-                        display.update_display(svg_title, display_id='algviz_{}'.format(did))
-                    display.update_display(elem(), display_id='algviz{}'.format(did))
-            temp_displayed = list(self._displayed)
-            for did in temp_displayed:
-                if did not in self._element2display.values():
-                    if did in self._displayid2name:
-                        display.update_display(_NoDisplay(), display_id='algviz_{}'.format(did))
-                    display.update_display(_NoDisplay(), display_id='algviz{}'.format(did))
-                    self._displayed.remove(did)
-            time.sleep(self._animate_delay)
-        else:
-            display.clear_output(wait=True)
-            for elem in self._element2display.keyrefs():
-                did = self._element2display[elem()]
+        for elem in self._element2display.keyrefs():
+            did = self._element2display[elem()]
+            if did not in self._displayed:
                 if did in self._displayid2name:
                     svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
                     display.display(svg_title, display_id='algviz_{}'.format(did))
                 display.display(elem(), display_id='algviz{}'.format(did))
                 self._displayed.add(did)
-            input('任意键继续：')
+            else:
+                if did in self._displayid2name:
+                    svg_title = self._createSvgTitle_(self._displayid2name[did], elem()._trace_info)
+                    display.update_display(svg_title, display_id='algviz_{}'.format(did))
+                display.update_display(elem(), display_id='algviz{}'.format(did))
+        temp_displayed = list(self._displayed)
+        for did in temp_displayed:
+            if did not in self._element2display.values():
+                if did in self._displayid2name:
+                    display.update_display(_NoDisplay(), display_id='algviz_{}'.format(did))
+                display.update_display(_NoDisplay(), display_id='algviz{}'.format(did))
+                self._displayed.remove(did)
+        time.sleep(self._animate_delay)
         
     '''
     row:int 表格行数；col:int 表格列数。
@@ -110,7 +94,7 @@ class Visualizer():
     bar:float 如果bar值小于零则忽略，否则以柱状图形式显示数据。
     返回：创建的向量对象。
     '''
-    def createVector(self, data=list(), cell_size=40, name=None, bar=-1):
+    def createVector(self, data, cell_size=50, name=None, bar=-1):
         global next_display_id
         vec = vector.Vector(data, self._animate_delay, cell_size, bar)
         self._element2display[vec] = next_display_id
@@ -209,11 +193,10 @@ class Visualizer():
             return None
         else:
             pick_color = None
-            pick_pool = list()
-            for color in self._trace_color_list:
-                if color not in show_obj._trace_info.keys():
-                    pick_pool.append(color)
-            pick_color = pick_pool[random.randint(0, len(pick_pool)-1)]
+            for i in range(len(self._trace_color_list)):
+                pick_color = self._trace_color_list[i]
+                if pick_color not in show_obj._trace_info.keys():
+                    break
             show_obj._trace_info[pick_color] = name
             return pick_color
 
@@ -226,7 +209,7 @@ class Visualizer():
         svg_title = svg_table.SvgTable(600, 24)
         svg_title.add_text_element((margin, 16), '{}:'.format(name), font_size=16, fill=(0,0,0))
         nb_trace = 0
-        offset_x = (utility.text_char_num(name) + 1)*8 + margin
+        offset_x = utility.text_char_num(name)*8 + margin*2
         for color in trace_info.keys():
             if trace_info[color] is not None:
                 x_pos = offset_x + nb_trace*(width + margin)

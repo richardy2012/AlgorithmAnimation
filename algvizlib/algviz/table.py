@@ -5,6 +5,8 @@
 @license:GPLv3
 '''
 
+import copy
+
 import svg_table
 import utility
 
@@ -42,17 +44,18 @@ class Table():
         self._frame_trace_old = list()    # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()        # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
         self._trace_info = dict()         # 记录现存的所有跟踪器的颜色和名称的映射关系。
+        self._delay = 0                   # 用于适配Visualizer，无实际用途。
         if data is None:
             self._data = [[None for _ in range(col)] for _ in range(row)]
         else:
-            self._data = data
+            self._data = copy.deepcopy(data)
         label_font_size = int(min(12, cell_size/len(str(max(row,col)-1))))
         table_margin = 3
         self._svg = svg_table.SvgTable(col*cell_size+label_font_size*len(str(row-1))+table_margin*2, row*cell_size+label_font_size+table_margin*2)
         for r in range(self._row):
             for c in range(self._col):
                 rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
-                self._svg.add_rect_element(rect, str(self._data[r][c]), angle=False)
+                self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = utility.TraceColorStack()
         for r in range(row):
             pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
@@ -83,7 +86,7 @@ class Table():
         gid = trace.r*self._col + trace.c
         self._cell_tcs[gid].add(trace._color)
         self._frame_trace.append((gid, trace._color, trace._hold))
-        self._svg.update_rect_element(gid, text=str(val))
+        self._svg.update_rect_element(gid, text=val)
         self._data[trace.r][trace.c] = val
     
     '''

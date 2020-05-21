@@ -5,6 +5,8 @@
 @license:GPLv3
 '''
 
+import copy
+
 from . import svg_table
 from . import utility
 
@@ -42,10 +44,11 @@ class Table():
         self._frame_trace_old = list()    # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()        # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
         self._trace_info = dict()         # 记录现存的所有跟踪器的颜色和名称的映射关系。
+        self._delay = 0                   # 用于适配Visualizer，无实际用途。
         if data is None:
             self._data = [[None for _ in range(col)] for _ in range(row)]
         else:
-            self._data = data
+            self._data = copy.deepcopy(data)
         label_font_size = int(min(12, cell_size/len(str(max(row,col)-1))))
         table_margin = 3
         self._svg = svg_table.SvgTable(col*cell_size+label_font_size*len(str(row-1))+table_margin*2, row*cell_size+label_font_size+table_margin*2)

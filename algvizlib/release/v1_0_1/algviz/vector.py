@@ -7,8 +7,8 @@
 
 import copy
 
-import svg_table as svgtab
-import utility as util
+from . import svg_table as svgtab
+from . import utility as util
 
 class VectorTrace():
     '''
