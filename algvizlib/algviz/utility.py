@@ -7,6 +7,9 @@
 
 import xml.dom.minidom as xmldom
 
+_getElemColor = (144, 238, 144)    # lightGreen
+_setElemColor = (255, 182, 193)    # lightPink
+
 '''
 管理一个元素上的多个颜色，执行颜色融合操作等。
 '''
@@ -169,7 +172,10 @@ text:str 文本内容（中英文混合都支持）。
 '''
 def text_font_size(text_width, text):
     display_len = text_char_num(text)
-    return min(16, text_width*1.5/display_len)
+    if display_len > 0:
+        return min(16, text_width*1.5/display_len)
+    else:
+        return 0
 
 '''
 功能：统计文本中字符个数。

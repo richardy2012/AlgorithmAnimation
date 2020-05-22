@@ -32,13 +32,12 @@ class SvgGraph():
         self._edge_appear = set()       # 记录下一帧动画中出现的边集合。
         self._edge_disappear = set()    # 记录下一帧动画中消失的边集合。
         self._node_move = set()         # 记录在动画效果中移动的节点集合。
-        self._frame_trace_old = list()  # 缓存上一帧需要清除的节点/边相关信息（节点索引，轨迹颜色值）。
-        self._frame_trace = list()      # 记录下一帧待刷新的节点/边相关信息(节点索引，轨迹颜色值，是否持久化)。
-        self._trace_info = dict()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
+        self._frame_trace_old = list()  # 缓存上一帧需要清除的节点/边相关信息（节点/边索引：（轨迹颜色值））。
+        self._frame_trace = list()      # 记录下一帧待刷新的节点/边相关信息(节点/边索引：（轨迹颜色值，是否持久化））。
         self._svg = None                # 将要显示的拓扑图的svg对象。
         self._node_idmap = None         # 实际节点和graphviz中对应节点的id值。
         self._edge_idmap = None         # 实际节点对和graphviz中对应边的id值。
-        self._trace_last_visit = dict() # 记录拓扑中所有跟踪器上一次访问的节点id值（(R,G,B):id）。
+        self._add_history = set()       # 记录所有被添加进来的节点。
         (self._svg, self._node_idmap, self._edge_idmap) = self._create_svg_()
         if data is not None:
             if type(data)==list:
@@ -51,96 +50,82 @@ class SvgGraph():
     node:... 要添加的节点对象，可以是拓扑图/树/链表节点。
     '''
     def add_node(self, node):
-        if node not in self._node_seq and node not in self._add_nodes:
+        if node in self._add_history:
+            return
+        node_stack = [node]
+        while len(node_stack) > 0:
+            cur_node = node_stack.pop()
+            if cur_node is None or cur_node in self._add_history:
+                continue
+            cur_node._add_graph_(self)
+            self._add_history.add(cur_node)
             self._add_nodes.append(node)
+            for neigh in cur_node._neighbors_()[::-1]:
+                node_stack.append(neigh[0])
     
     '''
     node:... 要删除的节点对象，可以是拓扑图/树/链表节点。
     recursive:bool 是否递归的删除和node相关联的节点。
     '''
-    def remove(self, node, recursive=False):
-        visited = set()
+    def remove_node(self, node, recursive=False):
         node_stack = [node]
         while len(node_stack) > 0:
             cur_node = node_stack.pop()
-            if cur_node is None or cur_node in visited:
+            if cur_node is None or cur_node not in self._add_history:
                 continue
-            visited.add(cur_node)
+            cur_node._remove_graph_(self)
+            self._add_history.remove(cur_node)
             if cur_node not in self._remove_nodes:
                 self._remove_nodes.append(cur_node)
             if recursive:
                 for neighbor in cur_node._neighbors_():
                     node_stack.append(neighbor[0])
-        
-    '''
-    node:... 跟踪器访问的节点，可以是拓扑图/树/链表节点。
-    color:(R,G,B) 跟踪器的颜色。
-    hold:bool 是否保留轨迹颜色。
-    '''
-    def trace_visit(self, node, color, hold):
-        if color in self._trace_last_visit.keys() and self._trace_last_visit[color] == node:
-            return
-        if node not in self._node_tcs.keys():
-            self._node_tcs[node] = util.TraceColorStack()
-        self._node_tcs[node].add(color)
-        self._frame_trace.append((node, color, hold))
-        if hold:
-            if color in self._trace_last_visit.keys():
-                edge_key = (self._trace_last_visit[color], node)
-                if edge_key in self._edge_tcs.keys():
-                    self._edge_tcs[edge_key].add(color)
-                    self._frame_trace.append((edge_key, color, hold))
-        self._trace_last_visit[color] = node
     
     '''
-    color:(R,G,B) 将要被删除的跟踪器颜色。
-    hold:bool 是否保留轨迹颜色。
+    node1/node2:... 起点/终点对象。
+    set_val:bool 代表是获取值还是设置值。
     '''
-    def delete_trace(self, color, hold):
-        if hold == True:
-            for k in self._node_seq:
-                if self._node_tcs[k].remove(color):
-                    node_id = 'node{}'.format(self._node_idmap.toConsecutiveId(k))
-                    node = util.find_tag_by_id(self._svg, 'g', node_id)
-                    self._update_node_color_(node, self._node_tcs[k].color())
-            for k in self._edge_label.keys():
-                if self._edge_tcs[k].remove(color):
-                    edge_id = 'edge{}'.format(self._edge_idmap.toConsecutiveId(k))
-                    edge = util.find_tag_by_id(self._svg, 'g', edge_id)
-                    self._update_edge_color_(edge, self._edge_tcs[k].color())
-        self._trace_last_visit.pop(color)
-        self._trace_info.pop(color)
+    def visit_node(self, node1, node2=None, set_val=False):
+        if set_val:
+            self.add_mark(node1, util._setElemColor, node2, False)
+        else:
+            self.add_mark(node1, util._getElemColor, node2, False)
     
     '''
-    功能：更新拓扑图中节点的标签值。
-    node:... 要更新的节点对象。
-    text:... 新的标签内容。
+    node1/node2:... 起点/终点对象。
+    color:(R, G, B) 标记颜色。
+    hold:bool 是否持久化标记。
     '''
-    def update_node_label(self, node, text):
-        node_id = 'node{}'.format(self._node_idmap.toConsecutiveId(node))
-        svg_node = util.find_tag_by_id(self._svg, 'g', node_id)
-        if svg_node is None or text is None:
-            return
-        ellipse = svg_node.getElementsByTagName('ellipse')[0]
-        cx = float(ellipse.getAttribute('cx'))
-        cy = float(ellipse.getAttribute('cy'))
-        rx = float(ellipse.getAttribute('rx'))
-        fc = util.str2rgbcolor(ellipse.getAttribute('fill'))
-        text_svg = svg_node.getElementsByTagName('text')
-        if text_svg is not None:
-            svg_node.removeChild(text_svg[0])
-        t = self._svg.createElement('text')
-        t.setAttribute('alignment-baseline', 'middle')
-        t.setAttribute('text-anchor', 'middle')
-        t.setAttribute('font-family', 'Times,serif')
-        t.setAttribute('x', '{:.2f}'.format(cx))
-        t.setAttribute('y', '{:.2f}'.format(cy))
-        font_size = min(14, util.text_font_size(2*rx, '{}'.format(text)))
-        t.setAttribute('font-size', '{:.2f}'.format(font_size))
-        t.setAttribute('fill', util.auto_text_color(fc))
-        tt = self._svg.createTextNode('{}'.format(text))
-        t.appendChild(tt)
-        svg_node.appendChild(t)
+    def add_mark(self, node1, color, node2=None, hold=True):
+        if node1 not in self._node_tcs.keys():
+            self._node_tcs[node1] = util.TraceColorStack()
+        self._node_tcs[node1].add(color)
+        self._frame_trace.append((node1, color, hold))
+        if node2 is not None:
+            if node2 not in self._node_tcs.keys():
+                self._node_tcs[node2] = util.TraceColorStack()
+            self._node_tcs[node2].add(color)
+            self._frame_trace.append((node2, color, hold))
+            edge_key = (node1, node2)
+            if edge_key not in self._edge_tcs.keys():
+                self._edge_tcs[edge_key] = util.TraceColorStack(bgcolor=(123, 123, 123))
+            self._edge_tcs[edge_key].add(color)
+            self._frame_trace.append((edge_key, color, hold))
+    
+    '''
+    color:(R,G,B) 将要被删除的标记颜色。
+    '''
+    def remove_mark(self, color):
+        for k in self._node_seq:
+            if self._node_tcs[k].remove(color):
+                node_id = 'node{}'.format(self._node_idmap.toConsecutiveId(k))
+                node = util.find_tag_by_id(self._svg, 'g', node_id)
+                self._update_node_color_(node, self._node_tcs[k].color())
+        for k in self._edge_label.keys():
+            if self._edge_tcs[k].remove(color):
+                edge_id = 'edge{}'.format(self._edge_idmap.toConsecutiveId(k))
+                edge = util.find_tag_by_id(self._svg, 'g', edge_id)
+                self._update_edge_color_(edge, self._edge_tcs[k].color())
     
     '''
     返回:str 拓扑图SVG显示字符串。
@@ -209,7 +194,8 @@ class SvgGraph():
             if node not in self._node_tcs.keys():
                 self._node_tcs[node] = util.TraceColorStack()
         for edge in self._edge_appear:
-            self._edge_tcs[edge] = util.TraceColorStack(bgcolor=(123, 123, 123))
+            if edge not in self._edge_tcs.keys():
+                self._edge_tcs[edge] = util.TraceColorStack(bgcolor=(123, 123, 123))
         # 更新其它辅助信息。
         self._node_seq = new_node_seq
         self._edge_label = new_edge_label
@@ -245,13 +231,15 @@ class SvgGraph():
     '''
     def _update_trace_color_(self):
         for k, color in self._frame_trace_old:
-            if type(k) == tuple:
-                self._edge_tcs[k].remove(color)
+            if type(k) == tuple and k in self._edge_tcs.keys():
+                if (k, color, True) not in self._frame_trace and (k, color, False) not in self._frame_trace:
+                    self._edge_tcs[k].remove(color)
                 edge_id = 'edge{}'.format(self._edge_idmap.toConsecutiveId(k))
                 edge = util.find_tag_by_id(self._svg, 'g', edge_id)
                 self._update_edge_color_(edge, self._edge_tcs[k].color())
-            else:
-                self._node_tcs[k].remove(color)
+            elif k in self._node_tcs.keys():
+                if (k, color, True) not in self._frame_trace and (k, color, False) not in self._frame_trace:
+                    self._node_tcs[k].remove(color)
                 node_id = 'node{}'.format(self._node_idmap.toConsecutiveId(k))
                 node = util.find_tag_by_id(self._svg, 'g', node_id)
                 self._update_node_color_(node, self._node_tcs[k].color())
@@ -410,10 +398,10 @@ class SvgGraph():
         dot.edge_attr.update(arrowhead='vee', color='#7B7B7B')
         for node in self._node_seq:
             node_id = node_idmap.toConsecutiveId(node)
-            if node.val is None:
+            if str(node) is None:
                 dot.node(name='{}'.format(node_id), shape='circle')
             else:
-                dot.node(name='{}'.format(node_id), label='{}'.format(node.val))
+                dot.node(name='{}'.format(node_id), label='{}'.format(str(node)))
         for (node1, node2) in self._edge_label.keys():
             label = self._edge_label[(node1, node2)]
             node1_id = node_idmap.toConsecutiveId(node1)

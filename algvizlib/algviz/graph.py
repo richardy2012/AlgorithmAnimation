@@ -15,83 +15,30 @@ class GraphNode():
     val:... 节点上显示的标签。
     '''
     def __init__(self, val):
+        self._bind_graph = dict()
         self.val = val
         self.neighbors = list()
         self.weights = list()
     
     '''
-    返回：所有邻居节点和邻居边的权重值。
-    '''
-    def _neighbors_(self):
-        res = list()
-        for i in range(len(self.neighbors)):
-            res.append((self.neighbors[i], self.weights[i]))
-        return res
-    
-    def __str__(self):
-        return str(self.val)
-
-'''
-拓扑图节点跟踪器的定义。
-'''
-class GraphTrace():
-    '''
-    node:GraphNode 初始化跟踪拓扑图的节点。
-    graph:SvgGraph 绑定要显示的图对象。
-    color:(R,G,B) 跟踪器所在节点的RGB背景颜色。
-    hold:bool 是否一直保留轨迹。
-    '''
-    def __init__(self, node, graph, color, hold):
-        self._graph = graph
-        self._node = node
-        self._color = color
-        self._hold = hold
-        if node is not None:
-            self._graph.add_node(node)
-            self._graph.trace_visit(self._node, self._color, self._hold)
-    
-    '''
-    功能：清除图中跟踪器的轨迹记录。
-    '''
-    def __del__(self):
-        self._graph.delete_trace(self._color, self._hold)
-    
-    '''
-    node:GraphNode 为跟踪器绑定新的拓扑图节点。
-    '''
-    def __call__(self, node):
-        if type(node) == GraphTrace:
-            node = node._node
-        elif type(node) == GraphNode:
-            node = node
-        super().__setattr__('_node', node)
-        self._graph.add_node(node)
-        self._graph.trace_visit(node, self._color, self._hold)
-        return self._node
-
-    '''
-    other:GraphNode 判断跟踪器所绑定的节点和other是否相同。
-    '''
-    def __eq__(self, other):
-        return super().__getattribute__('_node') == other
-    
-    '''
-    other:GraphNode 判断跟踪器所绑定的节点和other是否相同。
-    '''
-    def __ne__(self, other):
-        return super().__getattribute__('_node') != other 
-    
-    '''
     返回：跟踪器所跟踪的图节点中邻居的数量。
     '''
     def __len__(self):
-        return len(self._node.neighbors)
+        return len(self.neighbors)
+    
+    '''
+    功能：格式化树节点。
+    '''
+    def __str__(self):
+        return str(super().__getattribute__('val'))
     
     '''
     name:str 访问跟踪器的属性，以及跟踪器所绑定拓扑图节点的val属性。
     '''
     def __getattribute__(self, name):
         if name == 'val':
+            for gra in self._bind_graphs:
+                gra.visit_node(self)
             return super().__getattribute__('_node').val
         else:
             return super().__getattribute__(name)
@@ -102,8 +49,9 @@ class GraphTrace():
     '''
     def __setattr__(self, name, value):
         if name == 'val':
-            setattr(self._node, 'val', value)
-            self._graph.update_node_label(self._node, value)
+            super().__setattr__('val', value)
+            for gra in self._bind_graphs:
+                gra.visit_node(self, set_val=True)
         else:
             super().__setattr__(name, value)
 
@@ -140,6 +88,28 @@ class GraphTrace():
             self._graph.add_node(child_node)
             node.neighbors[index] = child_node
             node.weights[index] = child_edge
+    
+    '''
+    返回：所有邻居节点和邻居边的权重值。
+    '''
+    def _neighbors_(self):
+        res = list()
+        for i in range(len(self.neighbors)):
+            res.append((self.neighbors[i], self.weights[i]))
+        return res
+    
+    '''
+    gra:SvgGraph 要添加的该节点绑定的拓扑图对象。
+    '''
+    def _add_graph_(self, gra):
+        self._bind_graphs.add(gra)
+    
+    '''
+    gra:SvgGraph 要移除的该节点绑定的拓扑图对象。
+    '''
+    def _remove_graph_(self, gra):
+        if gra in self._bind_graphs:
+            self._bind_graphs.remove(gra)
 
 '''
 node_str:json字符串 表示拓扑图中的节点信息和节点上的标签（eg:[[0, 1], [1, 2], [2, 3]]）。

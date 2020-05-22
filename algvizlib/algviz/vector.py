@@ -4,27 +4,10 @@
 @author:zjluestc@outlook.com
 @license:GPLv3
 '''
-
 import copy
 
-import svg_table as svgtab
+import svg_table
 import utility as util
-
-class VectorTrace():
-    '''
-    vector:Vector 跟踪器所跟踪的表格对象。
-    color:(R,G,B) 跟踪器所在单元格的RGB背景颜色。
-    hold:bool 是否一直保留轨迹。
-    i:int 跟踪器初始索引位置。
-    '''
-    def __init__(self, vector, color, hold, i):
-        self._vector = vector
-        self._color = color
-        self._hold = hold
-        self.i = i
-        
-    def __del__(self):
-        self._vector.delete_trace(self)
 
 class Vector():
     '''
@@ -34,9 +17,9 @@ class Vector():
     bar:float 如果bar值小于零则忽略，否则以柱状图形式显示数据。
     '''
     def __init__(self, data, delay, cell_size, bar=-1):
-        if not isinstance(data, list):
-            return
-        self._data = copy.deepcopy(data)# 保存数组中的数据。
+        self._data = list()             # 保存数组中的数据。
+        if type(data) == list:
+            self._data = copy.deepcopy(data)
         self._delay = delay             # 动画延迟时间。
         self._cell_size = cell_size     # 单元格的宽度。
         self._bar = bar                 # 是否以柱状图形式显示数值高度（也包含SVG的高度信息）。
@@ -49,52 +32,22 @@ class Vector():
         self._rect_appear = list()      # 记录下一帧动画中出现的矩形索引。
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
         self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
-        self._trace_info = dict()       # 记录现存的所有跟踪器的颜色（方便为下一个跟踪器分配颜色）。
-        self._label_font_size = int(min(12, cell_size*0.5))
+        self._label_font_size = int(min(12, cell_size*0.5))   # 下标索引的字体大小。
         svg_height = cell_size + 2*self._cell_margin + self._label_font_size
         if self._bar > 0:
             svg_height = self._bar
-        self._svg = svgtab.SvgTable(len(data)*cell_size+(len(data)+1)*self._cell_margin, svg_height)
-        for i in range(len(data)):
+        self._svg = svg_table.SvgTable(len(self._data)*cell_size+(len(self._data)+1)*self._cell_margin, svg_height)
+        for i in range(len(self._data)):
             rect = (cell_size*i+self._cell_margin*(i+1), self._cell_margin, cell_size, cell_size)
-            rid = self._svg.add_rect_element(rect, text=data[i])
+            rid = self._svg.add_rect_element(rect, text=self._data[i])
             self._cell_tcs[rid] = util.TraceColorStack()
             self._index2rect[i] = rid
         if self._bar > 0:
             self._update_bar_height_()
-        for i in range(len(data)):
+        for i in range(len(self._data)):
             pos = (cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*len(str(i))*0.25, svg_height)
             tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
             self._index2text.append(tid)
-    
-    '''
-    trace:VectorTrace 数组的跟踪器对象。
-    返回：跟踪器对应位置的值。
-    '''
-    def __getitem__(self, trace):
-        if trace.i < 0:
-            trace.i += len(self._data)
-        elif trace.i >= len(self._data):
-            trace.i -= len(self._data)
-        rid = self._index2rect[trace.i]
-        self._cell_tcs[rid].add(trace._color)
-        self._frame_trace.append((rid, trace._color, trace._hold))
-        return self._data[trace.i]
-    
-    '''
-    trace:VectorTrace 数组的跟踪器对象。
-    返回：跟踪器对应位置的值。
-    '''
-    def __setitem__(self, trace, val):
-        if trace.i < 0:
-            trace.i += len(self._data)
-        elif trace.i >= len(self._data):
-            trace.i -= len(self._data)
-        rid = self._index2rect[trace.i]
-        self._cell_tcs[rid].add(trace._color)
-        self._frame_trace.append((rid, trace._color, trace._hold))
-        self._svg.update_rect_element(rid, text=val)
-        self._data[trace.i] = val
     
     '''
     index:int 要插入的位置，在其前方插入元素。
@@ -166,6 +119,50 @@ class Vector():
         self._data.clear()
     
     '''
+    index:int 添加颜色标记的位置。
+    color:(R,G,B) 添加的标记颜色值。
+    hold:bool 是否持久化标记。
+    '''
+    def add_mark(self, index, color, hold=True):
+        if index < 0 or index >= len(self._data):
+            index %= len(self._data)
+        rid = self._index2rect[index]
+        self._cell_tcs[rid].add(color)
+        self._frame_trace.append((rid, color, hold))
+    
+    '''
+    color:(R,G,B) 将要被删除的颜色标记对象。
+    '''
+    def remove_mark(self, color):
+        for rid in self._index2rect.values():
+            if self._cell_tcs[rid].remove(color):
+                self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
+    
+    '''
+    index:int 要访问对象的索引位置。
+    '''
+    def __getitem__(self, index):
+        if index < 0 or index >= len(self._data):
+            index %= len(self._data)
+        rid = self._index2rect[index]
+        self._cell_tcs[rid].add(util._getElemColor)
+        self._frame_trace.append((rid, util._getElemColor, False))
+        return self._data[index]
+    
+    '''
+    index:int 要赋值对象的索引位置。
+    val:... 对象的新值。
+    '''
+    def __setitem__(self, index, val):
+        if index < 0 or index >= len(self._data):
+            index %= len(self._data)
+        rid = self._index2rect[index]
+        self._cell_tcs[rid].add(util._setElemColor)
+        self._frame_trace.append((rid, util._setElemColor, False))
+        self._svg.update_rect_element(rid, text=str(val))
+        self._data[index] = val
+    
+    '''
     返回值：int 数组长度。
     '''
     def __len__(self):
@@ -182,7 +179,8 @@ class Vector():
             svg_height = self._bar
         self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin, svg_height)
         for (rid, color) in self._frame_trace_old:
-            self._cell_tcs[rid].remove(color)
+            if (rid, color, True) not in self._frame_trace and (rid, color, False) not in self._frame_trace:
+                self._cell_tcs[rid].remove(color)
             self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
         self._frame_trace_old.clear()
         for (rid, color, hold) in self._frame_trace:
@@ -265,13 +263,3 @@ class Vector():
             else:
                 num = '{:.0f}'.format(num)
             self._svg.update_rect_element(rid, rect=(x, y, self._cell_size, abs(height)), text=num)
-    
-    '''
-    trace:TableTrace 将要被删除的数组跟踪器对象。
-    '''
-    def delete_trace(self, trace):
-        if trace._hold:
-            for rid in self._index2rect.values():
-                if self._cell_tcs[rid].remove(trace._color):
-                    self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
-        self._trace_info.pop(trace._color)
