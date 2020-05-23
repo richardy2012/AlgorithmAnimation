@@ -8,7 +8,7 @@
 import json
 import copy
 
-import utility as util
+from . import utility as util
 
 '''
 拓扑图的邻居节点迭代器。

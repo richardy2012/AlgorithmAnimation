@@ -6,8 +6,8 @@
 '''
 import copy
 
-import svg_table
-import utility as util
+from . import svg_table
+from . import utility as util
 
 class Vector():
     '''

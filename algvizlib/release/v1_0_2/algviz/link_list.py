@@ -7,7 +7,7 @@
 
 import json
 
-import utility as util
+from . import utility as util
 
 '''
 单向链表节点定义。

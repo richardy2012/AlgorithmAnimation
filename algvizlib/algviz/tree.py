@@ -7,6 +7,8 @@
 
 import json
 
+import utility as util
+
 '''
 二叉树节点的定义。
 '''
@@ -15,23 +17,25 @@ class TreeNode:
     val:... 节点标签值（一般是整数）。
     '''
     def __init__(self, val):
-        self._bind_graphs = set()
-        self.val = val
-        self.left = None
-        self.right = None
+        super().__setattr__('val', val)
+        super().__setattr__('left', None)
+        super().__setattr__('right', None)
+        super().__setattr__('_bind_graphs', set())
     
     '''
     name:str 访问跟踪器的属性，以及跟踪器所绑定二叉树的节点val,left,right属性。
     '''
     def __getattribute__(self, name):
         if name == 'val':
-            for gra in self._bind_graphs:
-                gra.visit_node(self)
+            bind_graphs = super().__getattribute__('_bind_graphs')
+            for gra in bind_graphs:
+                gra.markNode(self, util._getElemColor, hold=False)
             return super().__getattribute__('val')
         elif name == 'left' or name == 'right':
             node = super().__getattribute__(name)
-            for gra in self._bind_graphs:
-                gra.visit_node(self, node)
+            bind_graphs = super().__getattribute__('_bind_graphs')
+            for gra in bind_graphs:
+                gra.markEdge(self, node, util._getElemColor, hold=False)
             return node
         else:
             return super().__getattribute__(name)
@@ -43,13 +47,21 @@ class TreeNode:
     def __setattr__(self, name, value):
         if name == 'val':
             super().__setattr__('val', value)
-            for gra in self._bind_graphs:
-                gra.visit_node(self, set_val=True)
+            bind_graphs = super().__getattribute__('_bind_graphs')
+            for gra in bind_graphs:
+                gra._updateNodeLabel(self, value)
+                gra.markNode(self, util._setElemColor, hold=False)
         elif name == 'left' or name == 'right':
+            # 标记旧边。
+            node = super().__getattribute__(name)
+            bind_graphs = super().__getattribute__('_bind_graphs')
+            for gra in bind_graphs:
+                gra.markEdge(self, node, util._setElemColor, hold=False)
+            # 标记新边。
             super().__setattr__(name, value)
-            for gra in self._bind_graphs:
-                gra.add_node(value)
-                gra.visit_node(self, value, set_val=True)
+            for gra in bind_graphs:
+                gra.addNode(value)
+                gra.markEdge(self, value, util._setElemColor, hold=False)
         else:
             super().__setattr__(name, value)
     
@@ -71,14 +83,16 @@ class TreeNode:
     gra:SvgGraph 要添加的该节点绑定的拓扑图对象。
     '''
     def _add_graph_(self, gra):
-        self._bind_graphs.add(gra)
+        bind_graphs = super().__getattribute__('_bind_graphs')
+        bind_graphs.add(gra)
     
     '''
     gra:SvgGraph 要移除的该节点绑定的拓扑图对象。
     '''
     def _remove_graph_(self, gra):
-        if gra in self._bind_graphs:
-            self._bind_graphs.remove(gra)
+        bind_graphs = super().__getattribute__('_bind_graphs')
+        if gra in bind_graphs:
+            bind_graphs.remove(gra)
 
 '''
 tree_str:str 表示二叉树的字符串，必须给出树中的每个节点标签，空节点使用null代替。

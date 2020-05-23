@@ -7,8 +7,8 @@
 
 import copy
 
-import svg_table
-import utility
+from . import svg_table
+from . import utility
 
 class Table():
     '''
