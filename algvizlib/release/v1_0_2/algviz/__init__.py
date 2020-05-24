@@ -21,3 +21,11 @@ __title__ = 'algviz'
 __version__ = '1.0.2'
 __author__ = 'zjluestc@outlook.com'
 __license__ = 'GNU General Public License (GPLv3)'
+
+colors = [
+    (255, 193, 37),  # Goldenrod
+    (221, 160, 221), # Plum
+    (202, 255, 112), # DarkOliveGreen
+    (176, 226, 255), # LightSkyBlue
+    (245, 222, 179), # Wheat
+]

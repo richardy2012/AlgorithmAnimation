@@ -173,7 +173,7 @@ text:str 文本内容（中英文混合都支持）。
 def text_font_size(text_width, text):
     display_len = text_char_num(text)
     if display_len > 0:
-        return min(16, text_width*1.5/display_len)
+        return min(16, text_width*1.6/display_len, text_width*0.8)
     else:
         return 0
 

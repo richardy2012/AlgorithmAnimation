@@ -16,8 +16,9 @@ class Table():
     col:int 表格列数。
     data:list(list(...)) 初始化数据。
     cell_size:float 单元格宽度。
+    show_index:bool 是否显示表格行列标签。
     '''
-    def __init__(self, row, col, data, cell_size):
+    def __init__(self, row, col, data, cell_size, show_index=True):
         if row <=0 or col <=0:
             raise Exception('Table row/col error!')
         self._row = row
@@ -32,18 +33,24 @@ class Table():
             self._data = copy.deepcopy(data)
         label_font_size = int(min(12, cell_size/len(str(max(row,col)-1))))
         table_margin = 3
-        self._svg = svg_table.SvgTable(col*cell_size+label_font_size*len(str(row-1))+table_margin*2, row*cell_size+label_font_size+table_margin*2)
+        svg_width = col*cell_size + table_margin*2
+        svg_height = row*cell_size + table_margin*2
+        if show_index:
+            svg_width += len(str(row-1))*label_font_size
+            svg_height += label_font_size
+        self._svg = svg_table.SvgTable(svg_width, svg_height)
         for r in range(self._row):
             for c in range(self._col):
                 rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = utility.TraceColorStack()
-        for r in range(row):
-            pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
-            self._svg.add_text_element(pos, r, font_size=label_font_size)
-        for c in range(col):
-            pos = ((c+0.5)*cell_size-label_font_size*len(str(c))*0.25+table_margin, row*cell_size+1+label_font_size+table_margin)
-            self._svg.add_text_element(pos, c, font_size=label_font_size)
+        if show_index:
+            for r in range(row):
+                pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
+                self._svg.add_text_element(pos, r, font_size=label_font_size)
+            for c in range(col):
+                pos = ((c+0.5)*cell_size-label_font_size*len(str(c))*0.25+table_margin, row*cell_size+1+label_font_size+table_margin)
+                self._svg.add_text_element(pos, c, font_size=label_font_size)
     
     '''
     index:(r, c) 标记所在的行列索引。
@@ -88,7 +95,7 @@ class Table():
         self._cell_tcs[gid].add(utility._setElemColor)
         self._frame_trace.append((gid, utility._setElemColor, False))
         self._svg.update_rect_element(gid, text=str(val))
-        self._data[r][c] = val
+        self._data[r][c] = copy.deepcopy(val)
     
     '''
     返回:str 表格当前状态下的SVG表示。

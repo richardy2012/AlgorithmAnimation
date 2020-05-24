@@ -17,6 +17,7 @@ from . import link_list
 from . import svg_graph
 from . import svg_table
 from . import utility
+from . import logger
 
 class _NoDisplay():
     def _repr_svg_(self):
@@ -50,18 +51,18 @@ class Visualizer():
                 did = self._element2display[elem()]
                 if did not in self._displayed:
                     if did in self._displayid2name:
-                        svg_title = svg_table.SvgTable(600, 20)
+                        svg_title = svg_table.SvgTable(400, 17)
                         title_name = '{}:'.format(self._displayid2name[did])
-                        svg_title.add_text_element((4, 16), title_name, font_size=16, fill=(0,0,0))
+                        svg_title.add_text_element((4, 14), title_name, font_size=14, fill=(0,0,0))
                         display.display(svg_title, display_id='algviz_{}'.format(did))
                     elem()._delay = delay
                     display.display(elem(), display_id='algviz{}'.format(did))
                     self._displayed.add(did)
                 else:
                     if did in self._displayid2name:
-                        svg_title = svg_table.SvgTable(600, 20)
+                        svg_title = svg_table.SvgTable(400, 17)
                         title_name = '{}:'.format(self._displayid2name[did])
-                        svg_title.add_text_element((4, 16), title_name, font_size=16, fill=(0,0,0))
+                        svg_title.add_text_element((4, 14), title_name, font_size=14, fill=(0,0,0))
                         display.update_display(svg_title, display_id='algviz_{}'.format(did))
                     elem()._delay = delay
                     display.update_display(elem(), display_id='algviz{}'.format(did))
@@ -78,9 +79,9 @@ class Visualizer():
             for elem in self._element2display.keyrefs():
                 did = self._element2display[elem()]
                 if did in self._displayid2name:
-                    svg_title = svg_table.SvgTable(600, 20)
+                    svg_title = svg_table.SvgTable(400, 17)
                     title_name = '{}:'.format(self._displayid2name[did])
-                    svg_title.add_text_element((4, 16), title_name, font_size=16, fill=(0,0,0))
+                    svg_title.add_text_element((4, 14), title_name, font_size=14, fill=(0,0,0))
                     display.display(svg_title, display_id='algviz_{}'.format(did))
                 elem()._delay = delay
                 display.display(elem(), display_id='algviz{}'.format(did))
@@ -92,14 +93,15 @@ class Visualizer():
     data:list(...) 表格中初始化的数据。
     name:str 表格的名字。
     cell_size:float 表格中单元格的长宽尺寸。
+    show_index:bool 是否显示表格行列标签。
     返回：创建的表格对象。
     '''
-    def createTable(self, row, col, data=None, name=None, cell_size=40):
+    def createTable(self, row, col, data=None, name=None, cell_size=40, show_index=True):
         global _next_display_id
-        tab = table.Table(row, col, data, cell_size)
+        tab = table.Table(row, col, data, cell_size, show_index)
         self._element2display[tab] = _next_display_id
         if name is not None:
-            self._displayid2name[_next_display_id]=name
+            self._displayid2name[_next_display_id] = name
         _next_display_id += 1
         return tab
 
@@ -108,14 +110,15 @@ class Visualizer():
     name:str 表格的名字。
     cell_size:float 向量中单元格的长宽尺寸。
     bar:float 如果bar值小于零则忽略，否则以柱状图形式显示数据。
+    show_index:bool 是否显示向量下标索引标签。
     返回：创建的向量对象。
     '''
-    def createVector(self, data=None, name=None, cell_size=40, bar=-1):
+    def createVector(self, data=None, name=None, cell_size=40, bar=-1, show_index=True):
         global _next_display_id
-        vec = vector.Vector(data, self._delay, cell_size, bar)
+        vec = vector.Vector(data, self._delay, cell_size, bar, show_index)
         self._element2display[vec] = _next_display_id
         if name is not None:
-            self._displayid2name[_next_display_id]=name
+            self._displayid2name[_next_display_id] = name
         _next_display_id += 1
         return vec
 
@@ -131,6 +134,18 @@ class Visualizer():
         gra = svg_graph.SvgGraph(data, directed, self._delay, horizontal)
         self._element2display[gra] = _next_display_id
         if name is not None:
-            self._displayid2name[_next_display_id]=name
+            self._displayid2name[_next_display_id] = name
         _next_display_id += 1
         return gra
+
+    '''
+    buffer_lines:int 记录器最大缓存行数。
+    '''
+    def createLogger(self, buffer_lines=10, name=None):
+        global _next_display_id
+        logg = logger.Logger(buffer_lines)
+        self._element2display[logg] = _next_display_id
+        if name is not None:
+            self._displayid2name[_next_display_id] = name
+        _next_display_id += 1
+        return logg

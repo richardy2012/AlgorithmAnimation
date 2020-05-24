@@ -15,14 +15,16 @@ class Vector():
     delay:float 动画延时。
     cell_size:float 单元格宽度。
     bar:float 如果bar值小于零则忽略，否则以柱状图形式显示数据。
+    show_index:bool 是否显示下标标签。
     '''
-    def __init__(self, data, delay, cell_size, bar=-1):
+    def __init__(self, data, delay, cell_size, bar=-1, show_index=True):
         self._data = list()             # 保存数组中的数据。
         if type(data) == list:
-            self._data = copy.deepcopy(data)
+            self._data = copy.copy(data)
         self._delay = delay             # 动画延迟时间。
         self._cell_size = cell_size     # 单元格的宽度。
         self._bar = bar                 # 是否以柱状图形式显示数值高度（也包含SVG的高度信息）。
+        self._show_index = show_index   # 是否显示下标标签。
         self._cell_margin = 3           # 矩形框之间的边距。
         self._cell_tcs = dict()         # (cell trace color stack)记录所有单元格的轨迹访问信息（节点索引：ColorStack）信息。
         self._frame_trace_old = list()  # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
@@ -33,7 +35,9 @@ class Vector():
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
         self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
         self._label_font_size = int(min(12, cell_size*0.5))   # 下标索引的字体大小。
-        svg_height = cell_size + 2*self._cell_margin + self._label_font_size
+        svg_height = cell_size + 2*self._cell_margin
+        if self._show_index:
+            svg_height += self._label_font_size
         if self._bar > 0:
             svg_height = self._bar
         self._svg = svg_table.SvgTable(len(self._data)*cell_size+(len(self._data)+1)*self._cell_margin, svg_height)
@@ -44,10 +48,11 @@ class Vector():
             self._index2rect[i] = rid
         if self._bar > 0:
             self._update_bar_height_()
-        for i in range(len(self._data)):
-            pos = (cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*len(str(i))*0.25, svg_height)
-            tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
-            self._index2text.append(tid)
+        if self._show_index:
+            for i in range(len(self._data)):
+                pos = (cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*len(str(i))*0.25, svg_height)
+                tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
+                self._index2text.append(tid)
     
     '''
     index:int 要插入的位置，在其前方插入元素。
@@ -72,7 +77,7 @@ class Vector():
         self._index2rect[index] = rid
         self._cell_tcs[rid] = util.TraceColorStack()
         self._rect_appear.append(rid)
-        self._data.insert(index, val)
+        self._data.insert(index, copy.deepcopy(val))
     
     '''
     val:... 要添加的值。
@@ -84,7 +89,7 @@ class Vector():
         self._index2rect[index] = rid
         self._cell_tcs[rid] = util.TraceColorStack()
         self._rect_appear.append(rid)
-        self._data.append(val)
+        self._data.append(copy.deepcopy(val))
     
     '''
     index:int 要删除的元素的位置。
@@ -117,6 +122,27 @@ class Vector():
         self._rect_move.clear()
         self._rect_appear.clear()
         self._data.clear()
+    
+    '''
+    功能：交换Vector中两个元素的位置。
+    index1/index2:int 要交换的两个索引位置。
+    '''
+    def swap(self, index1, index2):
+        rid1 = self._index2rect[index1]
+        rid2 = self._index2rect[index2]
+        self._index2rect[index1] = rid2
+        self._index2rect[index2] = rid1
+        if rid1 in self._rect_move.keys():
+            self._rect_move[rid1] += index2 - index1
+        else:
+            self._rect_move[rid1] = index2 - index1
+        if rid2 in self._rect_move.keys():
+            self._rect_move[rid2] += index1 - index2
+        else:
+            self._rect_move[rid2] = index1 - index2
+        temp_data = copy.deepcopy(self._data[index2])
+        self._data[index2] = copy.deepcopy(self._data[index1])
+        self._data[index1] = temp_data
     
     '''
     index:int 添加颜色标记的位置。
@@ -160,7 +186,7 @@ class Vector():
         self._cell_tcs[rid].add(util._setElemColor)
         self._frame_trace.append((rid, util._setElemColor, False))
         self._svg.update_rect_element(rid, text=str(val))
-        self._data[index] = val
+        self._data[index] = copy.deepcopy(val)
     
     '''
     返回值：int 数组长度。
@@ -174,7 +200,9 @@ class Vector():
     def _repr_svg_(self):
         # 更新矩形跟踪器的颜色。
         nb_elem = len(self._data) + len(self._rect_disappear)
-        svg_height = self._cell_size + 2*self._cell_margin+self._label_font_size
+        svg_height = self._cell_size + 2*self._cell_margin
+        if self._show_index:
+            svg_height += self._label_font_size
         if self._bar > 0:
             svg_height = self._bar
         self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin, svg_height)
@@ -200,15 +228,16 @@ class Vector():
             if self._rect_move[rid] == 0:
                 continue
             self._svg.add_animate_move(rid, (self._rect_move[rid]*(self._cell_size+self._cell_margin), 0) , (0, self._delay), bessel=False)
-        if len(self._index2text) > len(self._data):
-            for i in range(len(self._index2text)-len(self._data)):
-                self._svg.delete_element(self._index2text[-1])
-                self._index2text.pop()
-        elif len(self._index2text) < len(self._data):
-            for i in range(len(self._index2text), len(self._data)):
-                pos = (self._cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*0.25*len(str(i)), svg_height)
-                tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
-                self._index2text.append(tid)
+        if self._show_index:
+            if len(self._index2text) > len(self._data):
+                for i in range(len(self._index2text)-len(self._data)):
+                    self._svg.delete_element(self._index2text[-1])
+                    self._index2text.pop()
+            elif len(self._index2text) < len(self._data):
+                for i in range(len(self._index2text), len(self._data)):
+                    pos = (self._cell_size*(i+0.5)+self._cell_margin*(i+1)-self._label_font_size*0.25*len(str(i)), svg_height)
+                    tid = self._svg.add_text_element(pos, i, font_size=self._label_font_size)
+                    self._index2text.append(tid)
         self._rect_move.clear()
         res = self._svg._repr_svg_()
         # 清除动画效果，更新SVG内容，为下一帧做准备。
@@ -236,6 +265,8 @@ class Vector():
         # 根据数据范围调整比率和基线位置。
         mmax_data, max_data = 0, 0
         for num in self._data:
+            if num is None:
+                continue
             num = float(num)
             if num < 0:
                 mmax_data = min(mmax_data, num)
@@ -248,7 +279,10 @@ class Vector():
         baseline = max_data*ratio + self._cell_margin
         # 更新矩形的位置坐标。
         for i in range(len(self._data)):
-            num = float(self._data[i])
+            if self._data[i] is None:
+                num = 0
+            else:
+                num = float(self._data[i])
             rid = self._index2rect[i]
             x = self._cell_size*i + self._cell_margin*(i+1)
             if rid in self._rect_move.keys():
@@ -262,4 +296,6 @@ class Vector():
                 num = '{:.2f}'.format(num)
             else:
                 num = '{:.0f}'.format(num)
+            if self._data[i] is None:
+                num = None
             self._svg.update_rect_element(rid, rect=(x, y, self._cell_size, abs(height)), text=num)
