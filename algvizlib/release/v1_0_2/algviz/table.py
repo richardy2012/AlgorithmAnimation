@@ -94,7 +94,10 @@ class Table():
         gid = r*self._col + c
         self._cell_tcs[gid].add(utility._setElemColor)
         self._frame_trace.append((gid, utility._setElemColor, False))
-        self._svg.update_rect_element(gid, text=str(val))
+        label = val
+        if val is None:
+            label = ''
+        self._svg.update_rect_element(gid, text=label)
         self._data[r][c] = copy.deepcopy(val)
     
     '''

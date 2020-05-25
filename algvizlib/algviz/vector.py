@@ -185,7 +185,10 @@ class Vector():
         rid = self._index2rect[index]
         self._cell_tcs[rid].add(util._setElemColor)
         self._frame_trace.append((rid, util._setElemColor, False))
-        self._svg.update_rect_element(rid, text=str(val))
+        label = val
+        if val is None:
+            label = ''
+        self._svg.update_rect_element(rid, text=label)
         self._data[index] = copy.deepcopy(val)
     
     '''
