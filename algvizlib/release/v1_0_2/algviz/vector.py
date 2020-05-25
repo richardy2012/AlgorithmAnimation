@@ -275,7 +275,10 @@ class Vector():
         if (max_data - mmax_data) < 0.0001:
             ratio = 0
         else:
-            ratio = (self._bar - 2*self._cell_margin - self._label_font_size)/(max_data-mmax_data)
+            useful_height = self._bar - 2*self._cell_margin
+            if self._show_index:
+                useful_height -= self._label_font_size
+            ratio = useful_height/(max_data-mmax_data)
         baseline = max_data*ratio + self._cell_margin
         # 更新矩形的位置坐标。
         for i in range(len(self._data)):
