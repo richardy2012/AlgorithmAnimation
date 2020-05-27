@@ -19,8 +19,9 @@ class Vector():
     '''
     def __init__(self, data, delay, cell_size, bar=-1, show_index=True):
         self._data = list()             # 保存数组中的数据。
-        if type(data) == list:
-            self._data = copy.copy(data)
+        if data is not None:
+            for i in range(len(data)):
+                self._data.append(copy.deepcopy(data[i]))
         self._delay = delay             # 动画延迟时间。
         self._cell_size = cell_size     # 单元格的宽度。
         self._bar = bar                 # 是否以柱状图形式显示数值高度（也包含SVG的高度信息）。

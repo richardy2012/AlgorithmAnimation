@@ -27,10 +27,7 @@ class Table():
         self._frame_trace_old = list()    # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()        # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
         self._delay = 0                   # 用于适配Visualizer，无实际用途。
-        if data is None:
-            self._data = [[None for _ in range(col)] for _ in range(row)]
-        else:
-            self._data = copy.deepcopy(data)
+        self._data = [[None for _ in range(col)] for _ in range(row)]
         label_font_size = int(min(12, cell_size/len(str(max(row,col)-1))))
         table_margin = 3
         svg_width = col*cell_size + table_margin*2
@@ -44,6 +41,8 @@ class Table():
                 rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = utility.TraceColorStack()
+                if data is not None:
+                    self._data[r][c] = copy.deepcopy(data[r][c])
         if show_index:
             for r in range(row):
                 pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
