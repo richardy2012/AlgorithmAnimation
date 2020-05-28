@@ -118,7 +118,7 @@
 
 ## 参考资料
 
-+ 颜色的表示和混合策略（参考：[rgb颜色混合](https://www.jianshu.com/p/6d9a3f39bb53)）。
++ 颜色的表示和混合策略（参考：[rgb颜色混合](https://www.jianshu.com/p/6d9a3f39bb53)，[HTMl颜色代码对照](http://xh.5156edu.com/page/z1015m9220j18754.html)）。
 
 + 直接对SVG对象进行操作和更新，需要用到python的xml解析库（参考：[菜鸟教程](https://www.runoob.com/python3/python3-xml-processing.html)、[Python官方文档](https://docs.python.org/3/library/xml.dom.html)）。
 

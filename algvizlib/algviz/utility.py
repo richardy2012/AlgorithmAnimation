@@ -7,8 +7,8 @@
 
 import xml.dom.minidom as xmldom
 
-_getElemColor = (144, 238, 144)    # lightGreen
-_setElemColor = (255, 182, 193)    # lightPink
+_getElemColor = (0, 255, 127)      # SpringGreen
+_setElemColor = (255, 165, 0)      # Orange
 
 '''
 管理一个元素上的多个颜色，执行颜色融合操作等。
@@ -42,12 +42,7 @@ class TraceColorStack():
     def color(self):
         if len(self._colors) == 0:
             return self._bgcolor
-        r, g, b = 255, 255, 255
-        for (rr, gg, bb) in self._colors:
-            r *= rr / 255
-            g *= gg / 255
-            b *= bb / 255
-        return (int(r), int(g), int(b))
+        return self._colors[-1]
 
 '''
 为可哈希对象分配连续的整数空间。
