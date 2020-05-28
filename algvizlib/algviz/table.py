@@ -38,11 +38,11 @@ class Table():
         self._svg = svg_table.SvgTable(svg_width, svg_height)
         for r in range(self._row):
             for c in range(self._col):
+                if data is not None:
+                    self._data[r][c] = copy.deepcopy(data[r][c])
                 rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = utility.TraceColorStack()
-                if data is not None:
-                    self._data[r][c] = copy.deepcopy(data[r][c])
         if show_index:
             for r in range(row):
                 pos = (col*cell_size+table_margin*2, (r+0.5)*cell_size+label_font_size*0.5+table_margin)
