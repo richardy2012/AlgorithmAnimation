@@ -4,7 +4,6 @@
 @author:zjluestc@outlook.com
 @license:GPLv3
 '''
-import copy
 
 from . import svg_table
 from . import utility as util
@@ -21,7 +20,7 @@ class Vector():
         self._data = list()             # 保存数组中的数据。
         if data is not None:
             for i in range(len(data)):
-                self._data.append(copy.deepcopy(data[i]))
+                self._data.append(data[i])
         self._delay = delay             # 动画延迟时间。
         self._cell_size = cell_size     # 单元格的宽度。
         self._bar = bar                 # 是否以柱状图形式显示数值高度（也包含SVG的高度信息）。
@@ -78,7 +77,7 @@ class Vector():
         self._index2rect[index] = rid
         self._cell_tcs[rid] = util.TraceColorStack()
         self._rect_appear.append(rid)
-        self._data.insert(index, copy.deepcopy(val))
+        self._data.insert(index, val)
     
     '''
     val:... 要添加的值。
@@ -90,7 +89,7 @@ class Vector():
         self._index2rect[index] = rid
         self._cell_tcs[rid] = util.TraceColorStack()
         self._rect_appear.append(rid)
-        self._data.append(copy.deepcopy(val))
+        self._data.append(val)
     
     '''
     index:int 要删除的元素的位置。
@@ -141,8 +140,8 @@ class Vector():
             self._rect_move[rid2] += index1 - index2
         else:
             self._rect_move[rid2] = index1 - index2
-        temp_data = copy.deepcopy(self._data[index2])
-        self._data[index2] = copy.deepcopy(self._data[index1])
+        temp_data = self._data[index2]
+        self._data[index2] = self._data[index1]
         self._data[index1] = temp_data
     
     '''
@@ -190,7 +189,7 @@ class Vector():
         if val is None:
             label = ''
         self._svg.update_rect_element(rid, text=label)
-        self._data[index] = copy.deepcopy(val)
+        self._data[index] = val
     
     '''
     返回值：int 数组长度。

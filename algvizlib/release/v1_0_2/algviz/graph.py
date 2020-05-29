@@ -6,7 +6,6 @@
 '''
 
 import json
-import copy
 
 from . import utility as util
 
@@ -82,9 +81,9 @@ class GraphNode():
     功能：返回所有邻居节点。
     '''
     def neighbors(self):
-        neighbors_copy = copy.copy(super().__getattribute__('_neighbors'))
+        iter_neighbors = super().__getattribute__('_neighbors')
         bind_graphs = super().__getattribute__('_bind_graphs')
-        return GraphNeighborIter(self, bind_graphs, neighbors_copy)
+        return GraphNeighborIter(self, bind_graphs, iter_neighbors)
     
     '''
     功能：向最后一个邻居点后添加一个节点。

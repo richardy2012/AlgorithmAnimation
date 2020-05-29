@@ -5,8 +5,6 @@
 @license:GPLv3
 '''
 
-import copy
-
 from . import svg_table
 from . import utility
 
@@ -39,7 +37,7 @@ class Table():
         for r in range(self._row):
             for c in range(self._col):
                 if data is not None:
-                    self._data[r][c] = copy.deepcopy(data[r][c])
+                    self._data[r][c] = data[r][c]
                 rect = (c*cell_size+table_margin, r*cell_size+table_margin, cell_size, cell_size)
                 self._svg.add_rect_element(rect, self._data[r][c], angle=False)
                 self._cell_tcs[r*col+c] = utility.TraceColorStack()
@@ -97,7 +95,7 @@ class Table():
         if val is None:
             label = ''
         self._svg.update_rect_element(gid, text=label)
-        self._data[r][c] = copy.deepcopy(val)
+        self._data[r][c] = val
     
     '''
     返回:str 表格当前状态下的SVG表示。
