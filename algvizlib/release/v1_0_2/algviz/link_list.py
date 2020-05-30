@@ -5,8 +5,6 @@
 @license:GPLv3
 '''
 
-import json
-
 from . import utility as util
 
 '''
@@ -93,11 +91,10 @@ class ListNode():
             bind_graphs.remove(gra)
 
 '''
-li_str:str 表示单向链表的字符串，必须给出链表中每个节点的标签，空节点使用null代替。
+li_str:list 必须给出链表中每个节点的标签，空节点使用null代替。
 返回：ForwardListNode 创建的单向链表的根节点。
 '''
-def parseLinkList(li_str):
-    li_vals = json.loads(li_str)
+def parseLinkList(li_vals):
     if len(li_vals) == 0:
         return None
     head = ListNode(li_vals[0])

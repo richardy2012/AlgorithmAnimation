@@ -5,8 +5,6 @@
 @license:GPLv3
 '''
 
-import json
-
 import utility as util
 
 '''
@@ -204,17 +202,15 @@ def updateEdgeWeight(node1, node2, weight):
             gra.markEdge(node2, node1, util._setElemColor, hold=False)
     
 '''
-edges:str 表示拓扑图中的所有边（eg:[[0, 1], [1, 2], [2, 0]]）。
-nodes:str 表示拓扑图中的节点信息和节点上的标签（eg:[[0, 1], [1, 2], [2, 3]]）。
+edges:list(tuple/list) 表示拓扑图中的所有边（eg:[[0, 1], [1, 2], [2, 0]]）。
+nodes:list(tuple/list) 表示拓扑图中的节点信息和节点上的标签（eg:[[0, 1], [1, 2], [2, 3]]）。
 directed:bool 该拓扑图是否为有向图。
 返回：dict 拓扑图中所有节点的集合（key:节点id, value:节点对象）。
 '''
-def parseGraph(edges, nodes=None, directed=True):
-    edges_ = json.loads(edges)
+def parseGraph(edges_, nodes_=None, directed=True):
     res = dict()
     # 创建拓扑图节点。
-    if nodes is not None:
-        nodes_ = json.loads(nodes)
+    if nodes_ is not None:
         for nid, val in nodes_:
             res[nid] = GraphNode(val)
     else:

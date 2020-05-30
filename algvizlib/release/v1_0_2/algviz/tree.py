@@ -5,8 +5,6 @@
 @license:GPLv3
 '''
 
-import json
-
 from . import utility as util
 
 '''
@@ -95,11 +93,10 @@ class TreeNode:
             bind_graphs.remove(gra)
 
 '''
-tree_str:str 表示二叉树的字符串，必须给出树中的每个节点标签，空节点使用null代替。
+node_vals:list 必须给出树中的每个节点标签，空节点使用None代替。
 返回：BinaryTreeNode 创建的二叉树的根节点。
 '''
-def parseTree(tree_str):
-    node_vals = json.loads(tree_str)
+def parseTree(node_vals):
     if len(node_vals) == 0:
         return None
     root = TreeNode(node_vals[0])
