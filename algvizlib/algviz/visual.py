@@ -74,6 +74,7 @@ class Visualizer():
                     display.update_display(_NoDisplay(), display_id='algviz{}'.format(did))
                     self._displayed.remove(did)
             time.sleep(delay)
+            return None
         else:
             display.clear_output(wait=True)
             for elem in self._element2display.keyrefs():
@@ -86,7 +87,7 @@ class Visualizer():
                 elem()._delay = delay
                 display.display(elem(), display_id='algviz{}'.format(did))
                 self._displayed.add(did)
-            input('回车键继续：')
+            return input('回车键继续：')
         
     '''
     row:int 表格行数；col:int 表格列数。

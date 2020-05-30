@@ -210,7 +210,9 @@ class Vector():
             svg_height = self._bar
         self._svg.update_svg_size(nb_elem*self._cell_size+(nb_elem+1)*self._cell_margin, svg_height)
         for (rid, color) in self._frame_trace_old:
-            if (rid, color, True) not in self._frame_trace and (rid, color, False) not in self._frame_trace:
+            if rid not in self._cell_tcs.keys():
+                continue
+            if (rid, color, False) not in self._frame_trace and (rid, color, True) not in self._frame_trace:
                 self._cell_tcs[rid].remove(color)
             self._svg.update_rect_element(rid, fill=self._cell_tcs[rid].color())
         self._frame_trace_old.clear()

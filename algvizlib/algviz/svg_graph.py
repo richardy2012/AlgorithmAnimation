@@ -275,13 +275,13 @@ class SvgGraph():
     def _update_trace_color_(self):
         for k, color in self._frame_trace_old:
             if type(k) == tuple and k in self._edge_tcs.keys():
-                if (k, color, True) not in self._frame_trace and (k, color, False) not in self._frame_trace:
+                if (k, color, False) not in self._frame_trace and (k, color, True) not in self._frame_trace:
                     self._edge_tcs[k].remove(color)
                 edge_id = 'edge{}'.format(self._edge_idmap.toConsecutiveId(k))
                 edge = util.find_tag_by_id(self._svg, 'g', edge_id)
                 self._update_edge_color_(edge, self._edge_tcs[k].color())
             elif k in self._node_tcs.keys():
-                if (k, color, True) not in self._frame_trace and (k, color, False) not in self._frame_trace:
+                if (k, color, False) not in self._frame_trace and (k, color, True) not in self._frame_trace:
                     self._node_tcs[k].remove(color)
                 node_id = 'node{}'.format(self._node_idmap.toConsecutiveId(k))
                 node = util.find_tag_by_id(self._svg, 'g', node_id)
