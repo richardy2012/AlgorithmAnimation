@@ -22,3 +22,5 @@
 - [x] 🐛200529 `graph.py::neighbors` 接口中不应该拷贝一份邻居节点，这样拷贝的节点所绑定的可视化图对象就会发生改变，进而影响显示，直接返回引用即可。 
 - [ ] 🔨200530 `svg_graph.py` 自动调整拓扑图节点中字体的大小，顺便调试和调整一下节点边距。
 - [x] 🐛200530 `vector.py` vector中最后一个有颜色标记的元素被删除时出现刷新错误。
+- [x] 🐛200531 `utility.py` ColorStack中add接口和remove的功能更新。
+- [x] 🐛200531 修复`svg_table.py::update_rect_element` 文本从无更新到有的bug。 

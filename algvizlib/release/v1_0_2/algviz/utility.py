@@ -22,7 +22,7 @@ class TraceColorStack():
     color:(R,G,B)待添加的颜色值，stack中已有的颜色值将不能添加进去。
     '''
     def add(self, color):
-        if color not in self._colors:
+        if not len(self._colors) or color != self._colors[-1]:
             self._colors.append(color)
     
     '''
@@ -30,11 +30,15 @@ class TraceColorStack():
     返回值：(bool)False：color不在列表中；True：成功删除颜色。
     '''
     def remove(self, color):
-        if color in self._colors:
-            self._colors.remove(color)
-            return True
-        else:
-            return False
+        colors_new = list()
+        for i in range(len(self._colors)):
+            if color != self._colors[i]:
+                colors_new.append(self._colors[i])
+        res = False
+        if len(colors_new) < len(self._colors):
+            res = True
+        self._colors = colors_new
+        return res
     
     '''
     返回：融合后的颜色值(R,G,B)。

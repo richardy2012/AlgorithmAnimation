@@ -130,24 +130,24 @@ class SvgTable():
                 t[0].setAttribute('font-size', '{:.2f}'.format(new_font))
         if text is not None:
             if len(t) == 0:
-                rx = float(r.getAttribute('x'))
-                ry = float(r.getAttribute('y'))
-                width = float(r.getAttribute('width'))
-                height = float(r.getAttribute('height'))
-                fc = util.str2rgbcolor(r.getAttribute('fill'))
                 t = self._dom.createElement('text')
                 g.appendChild(t)
-                t.setAttribute('alignment-baseline', 'middle')
-                t.setAttribute('text-anchor', 'middle')
-                t.setAttribute('font-family', 'Times,serif')
-                t.setAttribute('x', '{:.2f}'.format(rx+width*0.5))
-                t.setAttribute('y', '{:.2f}'.format(ry+height*0.5))
-                t.setAttribute('font-size', '{:.2f}'.format(util.text_font_size(width, '{}'.format(text))))
-                t.setAttribute('fill', util.auto_text_color(fc))
             else:
                 t = t[0]
-                for t_child in t.childNodes:
-                    t.removeChild(t_child)
+            rx = float(r.getAttribute('x'))
+            ry = float(r.getAttribute('y'))
+            width = float(r.getAttribute('width'))
+            height = float(r.getAttribute('height'))
+            fc = util.str2rgbcolor(r.getAttribute('fill'))
+            t.setAttribute('alignment-baseline', 'middle')
+            t.setAttribute('text-anchor', 'middle')
+            t.setAttribute('font-family', 'Times,serif')
+            t.setAttribute('x', '{:.2f}'.format(rx+width*0.5))
+            t.setAttribute('y', '{:.2f}'.format(ry+height*0.5))
+            t.setAttribute('font-size', '{:.2f}'.format(util.text_font_size(width, '{}'.format(text))))
+            t.setAttribute('fill', util.auto_text_color(fc))
+            for t_child in t.childNodes:
+                t.removeChild(t_child)
             tt = self._dom.createTextNode('{}'.format(text))
             t.appendChild(tt)
         if stroke is not None:
