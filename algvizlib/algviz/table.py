@@ -8,6 +8,45 @@
 import svg_table
 import utility
 
+'''
+表格对象中指定某一行的迭代器。
+'''
+class TableRowIter():
+    '''
+    r:int 指定对哪一行进行迭代。
+    tab:Table 绑定的表格对象。
+    '''
+    def __init__(self, r, tab):
+        self._r = r
+        self._c = 0
+        self._tab = tab
+        
+    def __iter__(self):
+        self._c = 0
+        return self
+    
+    def __next__(self):
+        if self._c >= self._tab._col:
+            raise StopIteration
+        else:
+            res = self._tab.getItem(self._r, self._c)
+            self._c += 1
+            return res
+
+'''
+用于操作表格中指定行的元素。
+'''
+class TableRowOperator():
+    def __init__(self, r, tab):
+        self._r = r
+        self._tab = tab
+        
+    def __getitem__(self, c):
+        return self._tab.getItem(self._r, c)
+        
+    def __setitem__(self, c, val):
+        self._tab.setItem(self._r, c, val)
+
 class Table():
     '''
     row:int 表格行数。
@@ -25,6 +64,7 @@ class Table():
         self._frame_trace_old = list()    # 缓存上一帧需要清除的单元格相关信息（节点索引，轨迹颜色值）。
         self._frame_trace = list()        # 记录下一帧待刷新的单元格相关信息(节点索引，轨迹颜色值，是否持久化)。
         self._delay = 0                   # 用于适配Visualizer，无实际用途。
+        self._next_row = 0                # 用于表格的行迭代中标记当前迭代到哪一行。
         self._data = [[None for _ in range(col)] for _ in range(row)]
         label_font_size = int(min(12, cell_size/len(str(max(row,col)-1))))
         table_margin = 3
@@ -50,10 +90,11 @@ class Table():
                 self._svg.add_text_element(pos, c, font_size=label_font_size)
     
     '''
-    index:(r, c) 标记所在的行列索引。
+    color:(R, G, B) 标记的颜色。
+    r/c:int 标记所在的行列索引。
+    hold:bool 是否持久化标记。
     '''
-    def mark(self, index, color, hold=True):
-        r, c = index[0], index[1]
+    def mark(self, color, r, c, hold=True):
         if r < 0 or r >= self._row or c < 0 or c >= self._col:
             raise Exception("Table index out of range!")
         gid = r*self._col + c
@@ -69,10 +110,9 @@ class Table():
                 self._svg.update_rect_element(gid, fill=self._cell_tcs[gid].color())
     
     '''
-    index:(r, c) 要获取的对象在表格中的位置。
+    r/c:int 要访问元素在表格中的行列位置。
     '''
-    def __getitem__(self, index):
-        r, c = index[0], index[1]
+    def getItem(self, r, c):
         if r < 0 or r >= self._row or c < 0 or c >= self._col:
             raise Exception("Table index out of range!")
         gid = r*self._col + c
@@ -81,11 +121,10 @@ class Table():
         return self._data[r][c]
     
     '''
-    index:(r, c) 表格的行索引。
-    val:... 为表格中的单元所赋的值。
+    r/c:int 要修改的元素在表格中的行列位置。
+    val:... 修改的元素的新的值。
     '''
-    def __setitem__(self, index, val):
-        r, c = index[0], index[1]
+    def setItem(self, r, c, val):
         if r < 0 or r >= self._row or c < 0 or c >= self._col:
             raise Exception("Table index out of range!")
         gid = r*self._col + c
@@ -96,6 +135,25 @@ class Table():
             label = ''
         self._svg.update_rect_element(gid, text=label)
         self._data[r][c] = val
+    
+    '''
+    r:int 要访问的行索引。
+    返回：TabRowIter 迭代器对象。
+    '''
+    def __getitem__(self, r):
+        return TableRowOperator(r, self)
+    
+    def __iter__(self):
+        self._next_row = 0
+        return self
+    
+    def __next__(self):
+        if self._next_row >= self._row:
+            raise StopIteration
+        else:
+            res = TableRowIter(self._next_row, self)
+            self._next_row += 1
+            return res
     
     '''
     返回:str 表格当前状态下的SVG表示。

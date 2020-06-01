@@ -82,11 +82,11 @@ class SvgGraph():
                     node_stack.append(neighbor[0])
     
     '''
-    node:... 节点对象。
     color:(R, G, B) 标记颜色。
+    node:... 节点对象。
     hold:bool 是否持久化标记。
     '''
-    def markNode(self, node, color, hold=True):
+    def markNode(self, color, node, hold=True):
         if node is not None:
             if node not in self._node_tcs.keys():
                 self._node_tcs[node] = util.TraceColorStack()
@@ -94,11 +94,11 @@ class SvgGraph():
             self._frame_trace.append((node, color, hold))
     
     '''
-    node1/node2:... 起点/终点对象。
     color:(R, G, B) 标记颜色。
+    node1/node2:... 起点/终点对象。
     hold:bool 是否持久化标记。
     '''
-    def markEdge(self, node1, node2, color, hold=True):
+    def markEdge(self, color, node1, node2, hold=True):
         if node1 is not None and node2 is not None:
             edge_key = self._make_edge_tuple_(node1, node2)
             if edge_key not in self._edge_tcs.keys():
@@ -145,7 +145,7 @@ class SvgGraph():
         t.setAttribute('font-family', 'Times,serif')
         t.setAttribute('x', '{:.2f}'.format(cx))
         t.setAttribute('y', '{:.2f}'.format(cy))
-        font_size = min(14, util.text_font_size(2*rx, '{}'.format(label)))
+        font_size = min(14, util.text_font_size(32, '{}'.format(label)))
         t.setAttribute('font-size', '{:.2f}'.format(font_size))
         t.setAttribute('fill', util.auto_text_color(fc))
         tt = self._svg.createTextNode('{}'.format(label))
@@ -450,14 +450,15 @@ class SvgGraph():
             dot = graphviz.Graph(format='svg')
         if self._horizontal:
             dot.graph_attr['rankdir'] = 'LR'
-        dot.node_attr.update(shape='circle', fixedsize='true', color='#7B7B7B')
+        dot.node_attr.update(shape='circle', fixedsize='shape', color='#7B7B7B')
         dot.edge_attr.update(arrowhead='vee', color='#7B7B7B')
         for node in self._node_seq:
             node_id = node_idmap.toConsecutiveId(node)
             if node is None:
                 dot.node(name='{}'.format(node_id))
             else:
-                dot.node(name='{}'.format(node_id), label='{}'.format(str(node)))
+                fs = min(14, util.text_font_size(32, str(node)))
+                dot.node(name='{}'.format(node_id), label='{}'.format(str(node)), fontsize='{:.2f}'.format(fs))
         for (node1, node2) in self._edge_label.keys():
             label = self._edge_label[(node1, node2)]
             node1_id = node_idmap.toConsecutiveId(node1)
@@ -465,6 +466,6 @@ class SvgGraph():
             if label is None:
                 dot.edge('{}'.format(node1_id), '{}'.format(node2_id))
             else:
-                dot.edge('{}'.format(node1_id), '{}'.format(node2_id), label='{}'.format(label))
+                dot.edge('{}'.format(node1_id), '{}'.format(node2_id), label='{}'.format(label), fontcolor='#C0C0C0', fontsize='12')
             edge_idmap.toConsecutiveId((node1, node2))
         return (xmldom.parseString(dot._repr_svg_()), node_idmap, edge_idmap)

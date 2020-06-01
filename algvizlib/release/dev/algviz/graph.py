@@ -28,7 +28,7 @@ class GraphNeighborIter():
             neighbor = self._neighbors[self._next_index]
             self._next_index += 1
             for gra in self._bind_graphs:
-                gra.markEdge(self._node, neighbor[0], util._getElemColor, hold=False)
+                gra.markEdge(util._getElemColor, self._node, neighbor[0], hold=False)
             return neighbor
 
 '''
@@ -56,7 +56,7 @@ class GraphNode():
         if name == 'val':
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
-                gra.markNode(self, util._getElemColor, hold=False)
+                gra.markNode(util._getElemColor, self, hold=False)
             return super().__getattribute__('val')
         else:
             return super().__getattribute__(name)
@@ -71,7 +71,7 @@ class GraphNode():
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
                 gra._updateNodeLabel(self, value)
-                gra.markNode(self, util._setElemColor, hold=False)
+                gra.markNode(util._setElemColor, self, hold=False)
         else:
             super().__setattr__(name, value)
 
@@ -96,7 +96,7 @@ class GraphNode():
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
                 gra.addNode(node)
-                gra.markEdge(self, node, util._setElemColor, hold=False)
+                gra.markEdge(util._setElemColor, self, node, hold=False)
     
     '''
     功能：向某个邻居节点前插入一个节点。
@@ -113,7 +113,7 @@ class GraphNode():
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
                 gra.addNode(node)
-                gra.markEdge(self, node, util._setElemColor, hold=False)
+                gra.markEdge(util._setElemColor, self, node, hold=False)
     
     '''
     功能：替换某一个邻居节点。
@@ -126,14 +126,14 @@ class GraphNode():
         if pos != -1:
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
-                gra.markEdge(self, old_node, util._setElemColor, hold=False)
+                gra.markEdge(util._setElemColor, self, old_node, hold=False)
             pos2 = self._get_node_index_(new_node)  # 检测new_node是否已经是当前节点的邻居节点。
             if pos2 == -1:
                 neighbors_ = super().__getattribute__('_neighbors')
                 neighbors_[pos] = [new_node, weight]
                 for gra in bind_graphs:
                     gra.addNode(new_node)
-                    gra.markEdge(self, new_node, util._setElemColor, hold=False)
+                    gra.markEdge(util._setElemColor, self, new_node, hold=False)
             else:
                 neighbors_.pop(pos)
     
@@ -148,7 +148,7 @@ class GraphNode():
             neighbors_.pop(pos)
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
-                gra.markEdge(self, node, util._setElemColor, hold=False)
+                gra.markEdge(util._setElemColor, self, node, hold=False)
     
     '''
     node:GraphNode 要定位的节点对象。
@@ -194,12 +194,12 @@ def updateEdgeWeight(node1, node2, weight):
         node1._neighbors[pos1][1] = weight
         for gra in node1._bind_graphs:
             gra._updateEdgeLabel(node1, node2, weight)
-            gra.markEdge(node1, node2, util._setElemColor, hold=False)
+            gra.markEdge(util._setElemColor, node1, node2, hold=False)
     if pos2 != -1:
         node2._neighbors[pos2][1] = weight
         for gra in node2._bind_graphs:
             gra._updateEdgeLabel(node2, node1, weight)
-            gra.markEdge(node2, node1, util._setElemColor, hold=False)
+            gra.markEdge(util._setElemColor, node2, node1, hold=False)
     
 '''
 edges:list(tuple/list) 表示拓扑图中的所有边（eg:[[0, 1], [1, 2], [2, 0]]）。

@@ -35,6 +35,7 @@ class Vector():
         self._index2rect = dict()       # 数组下标到显示矩形对象id的映射关系。
         self._index2text = list()       # 数组下标到下标显示文本对象id的映射关系。
         self._label_font_size = int(min(12, cell_size*0.5))   # 下标索引的字体大小。
+        self._next_iter = 0             # 标记当前迭代位置。
         svg_height = cell_size + 2*self._cell_margin
         if self._show_index:
             svg_height += self._label_font_size
@@ -145,16 +146,19 @@ class Vector():
         self._data[index1] = temp_data
     
     '''
-    index:int 添加颜色标记的位置。
     color:(R,G,B) 添加的标记颜色值。
+    st/ed:int 添加颜色标记的位置（区间）。
     hold:bool 是否持久化标记。
     '''
-    def mark(self, index, color, hold=True):
-        if index < 0 or index >= len(self._data):
-            index %= len(self._data)
-        rid = self._index2rect[index]
-        self._cell_tcs[rid].add(color)
-        self._frame_trace.append((rid, color, hold))
+    def mark(self, color, st, ed=None, hold=True):
+        if ed is None:
+            ed = st + 1
+        for i in range(st, ed):
+            if i < 0 or i >= len(self._data):
+                i %= len(self._data)
+            rid = self._index2rect[i]
+            self._cell_tcs[rid].add(color)
+            self._frame_trace.append((rid, color, hold))
     
     '''
     color:(R,G,B) 将要被删除的颜色标记对象。
@@ -196,6 +200,18 @@ class Vector():
     '''
     def __len__(self):
         return len(self._data)
+    
+    def __iter__(self):
+        self._next_iter = 0
+        return self
+    
+    def __next__(self):
+        if self._next_iter >= len(self._data):
+            raise StopIteration
+        else:
+            res = self[self._next_iter]
+            self._next_iter += 1
+            return res
     
     '''
     返回：str 数组当前状态下的SVG表示。

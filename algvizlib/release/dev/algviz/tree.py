@@ -27,13 +27,13 @@ class TreeNode:
         if name == 'val':
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
-                gra.markNode(self, util._getElemColor, hold=False)
+                gra.markNode(util._getElemColor, self, hold=False)
             return super().__getattribute__('val')
         elif name == 'left' or name == 'right':
             node = super().__getattribute__(name)
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
-                gra.markEdge(self, node, util._getElemColor, hold=False)
+                gra.markEdge(util._getElemColor, self, node, hold=False)
             return node
         else:
             return super().__getattribute__(name)
@@ -48,18 +48,18 @@ class TreeNode:
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
                 gra._updateNodeLabel(self, value)
-                gra.markNode(self, util._setElemColor, hold=False)
+                gra.markNode(util._setElemColor, self, hold=False)
         elif name == 'left' or name == 'right':
             # 标记旧边。
             node = super().__getattribute__(name)
             bind_graphs = super().__getattribute__('_bind_graphs')
             for gra in bind_graphs:
-                gra.markEdge(self, node, util._setElemColor, hold=False)
+                gra.markEdge(util._setElemColor, self, node, hold=False)
             # 标记新边。
             super().__setattr__(name, value)
             for gra in bind_graphs:
                 gra.addNode(value)
-                gra.markEdge(self, value, util._setElemColor, hold=False)
+                gra.markEdge(util._setElemColor, self, value, hold=False)
         else:
             super().__setattr__(name, value)
     
