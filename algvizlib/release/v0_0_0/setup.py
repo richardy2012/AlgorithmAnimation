@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name="algviz",
-    version="1.0.0",
+    version="0.0.0",
     author="zjl9959",
     author_email="zjluestc@outlook.com",
     description=("This is a algorithm visualizer lib."),

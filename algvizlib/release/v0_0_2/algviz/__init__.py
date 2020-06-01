@@ -12,13 +12,13 @@ from .link_list import ListNode, parseLinkList
 
 __all__ = [
     'Visualizer',
-    'GraphNode', 'parseGraph', 'updateEdgeWeight'
+    'GraphNode', 'parseGraph', 'updateEdgeWeight',
     'TreeNode', 'parseTree',
     'ListNode', 'parseLinkList',
 ]
 
 __title__ = 'algviz'
-__version__ = '1.0.2'
+__version__ = '0.0.2'
 __author__ = 'zjluestc@outlook.com'
 __license__ = 'GNU General Public License (GPLv3)'
 
