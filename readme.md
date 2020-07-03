@@ -4,6 +4,10 @@
 
 + [常用网络表情包](工具文档/常用网络表情包.md) （符号、心情、Unicode编码）
 
+## 基础知识问答
+
++ [cpp语言特性相关](基础知识问答/cpp语言特性相关.md) （C++、编程语言、语法）
+
 ## 算法与数据结构
 
 + [排序算法](算法与数据结构/排序算法.ipynb) （插入排序、冒泡排序、快排、快速排序、归并排序、堆排序、桶排序）
@@ -31,3 +35,25 @@
 + [二维网格寻路算法](游戏相关/二维网格寻路算法.ipynb) （广度优先搜索、BFS、A\*算法、最短路径）
 + [汉诺塔游戏](游戏相关/汉诺塔.ipynb) （递归、套娃）
 + [2048游戏](游戏相关/2048.ipynb) （数字游戏、休闲）
+
+# 使用说明
+
+## 关于algvizlib
+
+`algvizlib` 是一个基于 **jupyter notebook** 的数据结构可视化库。它提供一组接口用于操作一维向量(vector)、二维表格(table)、链表(link_list)、二叉树(tree)、拓扑图(graph)等数据结构的变化，并根据数据内容的变化生成直观的动画效果。  
+*本笔记中的许多算法都使用了 `algvizlib` 来进行可视化，用于加深读者对算法的理解。*
+
+`algvizlib` 库位于 `algvizlib/` 文件夹下面，具体的接口使用可参考 [algvizlib接口使用说明](algvizlib/readme.md)。 `algvizlib` 需要在 **Python3** 的环境下运行，且需要 `graphviz` 动态链接库的支持，下面介绍它的安装过程：
+
++ linux环境下的安装步骤（Ubuntu实例）：
+    
+    1. 安装 `graphviz` 动态链接库到系统，参考[博客](https://blog.csdn.net/caiandyong/article/details/44408831)：
+        > `apt-get install graphviz`
+    2. 安装 `algvizlib` 到 Python 库中：
+        > `cd [notebooks仓库目录]/algvizlib/release/[对应版本文件夹]`
+        >
+        > `python setup.py install`
+
++ windows环境下的安装步骤（Windows10实例）：
+
+> TODO
