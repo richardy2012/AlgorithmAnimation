@@ -51,13 +51,13 @@
 
 ## 关于algvizlib
 
-`algvizlib` 是由本人独立开发的的数据结构可视化库，基于 **jupyter notebook** 和 **graphviz 拓扑图可视化库**。它提供一组接口用于操作一维向量(vector)、二维表格(table)、链表(link_list)、二叉树(tree)、拓扑图(graph)等数据结构，并根据数据内容的变化生成直观的动画效果，可以在常见的浏览器中渲染显示。
+`algvizlib` 是由本人独立开发的的数据结构可视化库，基于 **jupyter notebook** 和 **graphviz 拓扑图可视化库**。它提供一组接口用于操作一维向量(vector)、二维表格(table)、链表(link_list)、二叉树(tree)、拓扑图(graph)等数据结构，并**根据数据内容的变化生成直观的动画效果，可以在常用的浏览器中渲染显示**。
 
 *本笔记中的许多算法代码都使用了 `algvizlib` 来进行可视化，用于加深作者对算法的理解。* 
 
-使用该库，你可以方便的展示自己的[排序算法的运行过程](算法与数据结构/排序算法.ipynb)
+使用该库，你可以方便的展示自己的[排序算法](算法与数据结构/排序算法.ipynb)的运行过程，下图是冒泡排序的动画效果：
 
-![冒泡排序动画](https://github.com/zjl9959/notebooks/blob/master/工具文档/images/冒泡排序动画.gif)
+<img src="冒泡排序动画https://github.com/zjl9959/notebooks/blob/master/工具文档/images/冒泡排序动画.gif" width="300" height="300" />
 
 也可以直观的观察自己在解决编程题时所写出来的奇怪逻辑（[leetcode.105题.从前序与中序遍历序列构造二叉树](经典编程题/lc105.从前序与中序遍历序列构造二叉树.ipynb)）
 
