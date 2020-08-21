@@ -57,15 +57,15 @@
 
 使用该库，你可以方便的展示自己的[排序算法](算法与数据结构/排序算法.ipynb)的运行过程，下图是冒泡排序的动画效果：
 
-<img src="冒泡排序动画https://github.com/zjl9959/notebooks/blob/master/工具文档/images/冒泡排序动画.gif" width="300" height="300" />
+<img src="https://github.com/zjl9959/notebooks/blob/master/工具文档/images/冒泡排序动画.gif" algin=center width="358" height="270" />
 
 也可以直观的观察自己在解决编程题时所写出来的奇怪逻辑（[leetcode.105题.从前序与中序遍历序列构造二叉树](经典编程题/lc105.从前序与中序遍历序列构造二叉树.ipynb)）
 
-![构造二叉树动画](https://github.com/zjl9959/notebooks/blob/master/工具文档/images/构造二叉树.gif)
+<img src="https://github.com/zjl9959/notebooks/blob/master/工具文档/images/构造二叉树.gif" algin=center width="409" height="568" />
 
 甚至可以写一些简单的游戏来玩[2048游戏](游戏相关/2048.ipynb)😄。
 
-![2048动画](https://github.com/zjl9959/notebooks/blob/master/工具文档/images/2048.gif)
+<img src="https://github.com/zjl9959/notebooks/blob/master/工具文档/images/2048.gif" algin=center width="291" height="311" />
 
 *另外，由于开发时间仓促，代码中可能存在一些 bug，希望能够帮忙指出，一些额外的功能也欢迎提出*。
 
