@@ -76,8 +76,11 @@
 ### linux环境下的安装步骤（Ubuntu实例）：
     
 1. 安装 `graphviz` 动态链接库到系统，参考博客：[graphviz的安装](https://blog.csdn.net/caiandyong/article/details/44408831)：
+
     > `apt-get install graphviz`
+    
 2. 安装 `algvizlib` 到 Python 库中：
+
     > `cd [仓库目录]/algvizlib/release/[对应版本文件夹]`
     >
     > `python setup.py install`
