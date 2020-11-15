@@ -46,7 +46,7 @@
 [graphviz](https://graphviz.gitlab.io) 是一款强大的开源拓扑图布局库，本仓库中代码的运行需要依赖该库，可以参考以下教程进行安装：
 
 + Windows 版本安装教程：https://zhuanlan.zhihu.com/p/69185415
-+ Mac 版本安装教程：https://www.jianshu.com/p/80feb3acbaf7
++ Mac 版本安装教程：https://blog.csdn.net/skyztttt/article/details/71601365
 + Linux 版本安装教程：https://blog.csdn.net/caiandyong/article/details/44408831
 
 ## 关于 algvizlib
