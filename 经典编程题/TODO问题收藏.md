@@ -144,6 +144,10 @@
 
 + 576.出界的路径数
 
+### 并查集
+
++ [399.除法求值](https://leetcode-cn.com/problems/evaluate-division/)
+
 # 参考
 
 + [leetcode上动态规划问题的分类收集](https://leetcode-cn.com/circle/article/NfHhXD/)
